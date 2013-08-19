@@ -4,7 +4,7 @@
   <title><![CDATA[Short notes]]></title>
   <link href="http://C0rWin.github.io//github/atom.xml" rel="self"/>
   <link href="http://C0rWin.github.io//github/"/>
-  <updated>2013-08-19T21:17:36+03:00</updated>
+  <updated>2013-08-19T21:50:27+03:00</updated>
   <id>http://C0rWin.github.io//github/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -12,5 +12,14 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Test post]]></title>
+    <link href="http://C0rWin.github.io//github/blog/2013/08/19/test-post/"/>
+    <updated>2013-08-19T21:48:00+03:00</updated>
+    <id>http://C0rWin.github.io//github/blog/2013/08/19/test-post</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
   
 </feed>
