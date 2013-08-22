@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://C0rWin.github.io//github/sitemap.xml 
+Sitemap: http://pensieve.info//github/sitemap.xml 

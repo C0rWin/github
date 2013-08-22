@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Short notes]]></title>
-  <link href="http://C0rWin.github.io//github/atom.xml" rel="self"/>
-  <link href="http://C0rWin.github.io//github/"/>
-  <updated>2013-08-22T23:09:34+03:00</updated>
-  <id>http://C0rWin.github.io//github/</id>
+  <link href="http://pensieve.info//github/atom.xml" rel="self"/>
+  <link href="http://pensieve.info//github/"/>
+  <updated>2013-08-22T23:17:21+03:00</updated>
+  <id>http://pensieve.info//github/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Test post]]></title>
-    <link href="http://C0rWin.github.io//github/blog/2013/08/19/test-post/"/>
+    <link href="http://pensieve.info//github/blog/2013/08/19/test-post/"/>
     <updated>2013-08-19T21:48:00+03:00</updated>
-    <id>http://C0rWin.github.io//github/blog/2013/08/19/test-post</id>
+    <id>http://pensieve.info//github/blog/2013/08/19/test-post</id>
     <content type="html"><![CDATA[
 ]]></content>
   </entry>
