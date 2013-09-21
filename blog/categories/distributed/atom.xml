@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: distributed | Short notes]]></title>
+  <link href="http://pensieve.info/blog/categories/distributed/atom.xml" rel="self"/>
+  <link href="http://pensieve.info/"/>
+  <updated>2013-09-21T19:22:58+03:00</updated>
+  <id>http://pensieve.info/</id>
+  <author>
+    <name><![CDATA[C0rWin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Setup hadoop cluster]]></title>
+    <link href="http://pensieve.info/blog/2013/09/21/setup-hadoop-cluster/"/>
+    <updated>2013-09-21T01:10:00+03:00</updated>
+    <id>http://pensieve.info/blog/2013/09/21/setup-hadoop-cluster</id>
+    <content type="html"><![CDATA[<p>Recently I&rsquo;ve required to execute some heavy clustering computation on relatively big dataset. Since <a href="http://mahout.apache.org/">Mahout</a> (scalable machine learning framework) already has all required capabilities and holds implementation of base clustering algorithm, I&rsquo;ve decide to use it as a start point and bacause <a href="http://mahout.apache.org/">Mahout</a> is <a href="http://hadoop.apache.org/">Hadoop</a> based I&rsquo;ve had to setup cluster of <a href="http://hadoop.apache.org/">Hadoop</a> nodes to be able to execute my clustering task.</p>
+
+<p>So here I&rsquo;ll try to memorize steps which required for distributed setup of hadoop cluster, for sake of simplicity I&rsquo;ll described setup for only two nodes: master and slave. In this blog post I am going to describe manual install and configuration, while in the next I&rsquo;ll describe the automation configuration and install using <a href="http://puppetlabs.com/">puppet</a> and <a href="http://www.vagrantup.com/">vagrant</a> tools.  I will describe the installation process in context of Ubuntu 12.10 server, while I belive same steps will work for other distirbutives as well.</p>
+
+<!-- more -->
+
+
+<p>Here is the steps required for Hadoop install and configuration in order to be able to execute distributed tasks on cluster nodes:</p>
+
+<ol>
+<li><a href="#java_download_install">Java download and installation</a>.</li>
+<li><a href="#hadoop_install">Download Hadoop and setup</a>.</li>
+<li><a href="#ssh">Setup ssh configuration and configure public keys</a>.</li>
+<li><a href="#hadoop_startup">Hadoop startup</a>.</li>
+</ol>
+
+
+<h3><a id="java_download_install">Java download and installation.</a></h3>
+
+<p>Bellow steps has to be performed for each node in cluster in order to make sure each one has recent Oracle Java JDK installed.</p>
+
+<ul>
+<li>Download recent Java JDK for Linux distribution from Oracle official <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">site</a>. By the time writing this post recent tar gz was <em>jdk-7u40-linux-i586.tar.gz</em>.</li>
+<li>Extract files from archive, run following command in terminal:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar xfv jdk-7u40-linux-i586.tar.gz</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Move extracted folder:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo mv jdk1.7.0_40 /usr/lib/jvm/jdk1.7.0_40</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Update alternatives, install setup aliases for new Java jdk:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo update-alternatives &mdash;install /bin/java java /usr/lib/jvm/jdk1.7.0_40/bin/java 1
+</span><span class='line'>sudo update-alternatives &mdash;install /bin/javac javac /usr/lib/jvm/jdk1.7.0_40/bin/javac 1</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Make installed aliases active:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo update-alternatives &mdash;set java /usr/lib/jvm/jdk1.7.0_40/bin/java
+</span><span class='line'>sudo update-alternatives &mdash;set javac /usr/lib/jvm/jdk1.7.0_40/bin/javac</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Configure <strong>$JAVA_HOME</strong>:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo touch /etc/profile.d/java.sh
+</span><span class='line'>sudo -c &lsquo;echo &ldquo;export JAVA_HOME=/usr/lib/jvm/jdk1.7.0_40/&rdquo; >> /etc/profile.d/java.sh&rsquo;
+</span><span class='line'>sudo -c &lsquo;echo &ldquo;export PATH=$PATH:$JAVA_HOME/bin&rdquo; >> /etc/profile.d/java.sh&rsquo;</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+</ul>
+
+
+<h3><a id="hadoop_install">Download Hadoop distribution</a></h3>
+
+<ul>
+<li>Download Hadoop from releases <a href="http://apache.spd.co.il/hadoop/common/">site</a>, choose last stable version.</li>
+<li>Extract downloaded files into home folder:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar xfv hadoop-1.2.1.tar.gz</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Configure <strong>$HADOOP_HOME</strong>:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo touch /etc/profile.d/hadoop.sh
+</span><span class='line'>sudo -c &lsquo;echo &ldquo;export HADOOP_HOME=~/hadoop-1.2.0/&rdquo; >> /etc/profile.d/hadoop.sh&rsquo;
+</span><span class='line'>sudo -c &lsquo;echo &ldquo;export PATH=$PATH:$HADOOP_HOME/bin&rdquo; >> /etc/profile.d/hadoop.sh&rsquo;</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+</ul>
+
+
+<p>Now for next few steps assume we have two computer with IP addresses as follow: <strong>192.168.17.1</strong> (master) and <strong>192.168.17.2</strong> (slave).</p>
+
+<ul>
+<li>Open file $HADOOP_HOME/conf/core-site.xml and write content:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>core-site.xml</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="ni">&amp;lt;</span>?xml version=<span class="ni">&amp;ldquo;</span>1.0<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'><span class="ni">&amp;lt;</span>?xml-stylesheet type=<span class="ni">&amp;ldquo;</span>text/xsl<span class="ni">&amp;rdquo;</span> href=<span class="ni">&amp;ldquo;</span>configuration.xsl<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'>  <span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;property&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;name&gt;</span>fs.default.name<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;value&gt;</span>hdfs://192.168.17.1:9000<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;description&gt;</span>The name of the default file system. A URI whose scheme and authority determine the FileSystem implementation.<span class="nt">&lt;/description&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/property&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/configuration&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Next open $HADOOP_HOME/conf/hdfs-site.xml and write content:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>hdfs-site.xml</span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="ni">&amp;lt;</span>?xml version=<span class="ni">&amp;ldquo;</span>1.0<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'><span class="ni">&amp;lt;</span>?xml-stylesheet type=<span class="ni">&amp;ldquo;</span>text/xsl<span class="ni">&amp;rdquo;</span> href=<span class="ni">&amp;ldquo;</span>configuration.xsl<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;property&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;name&gt;</span>dfs.replication<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;value&gt;</span>1<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;description&gt;</span>The actual number of replications can be specified when the file is created.<span class="nt">&lt;/description&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/property&gt;</span>
+</span><span class='line'><span class="nt">&lt;/configuration&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Now open $HADOOP_HOME/conf/mapred-site.xml and write content:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>mapred-site.xml </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="ni">&amp;lt;</span>?xml version=<span class="ni">&amp;ldquo;</span>1.0<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'><span class="ni">&amp;lt;</span>?xml-stylesheet type=<span class="ni">&amp;ldquo;</span>text/xsl<span class="ni">&amp;rdquo;</span> href=<span class="ni">&amp;ldquo;</span>configuration.xsl<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;property&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;name&gt;</span>mapred.job.tracker<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;value&gt;</span>192.168.17.1:9001<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;description&gt;</span>The host and port that the MapReduce job tracker runs at.<span class="nt">&lt;/description&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/property&gt;</span>
+</span><span class='line'><span class="nt">&lt;/configuration&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>And finally you need to change two more files first $HADOOP_HOME/conf/masters and second is $HADOOP_HOME/conf/slaves, not too hard to guess what should be contet of each one of these:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>masters </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.17.1</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+</ul>
+
+
+<p>and</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>slaves </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.17.1
+</span><span class='line'>192.168.17.2</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>I&rsquo;ve putted 192.168.17.1 in both files, since I&rsquo;d like to have master node to execute computational task as well and hold distributed data.</p>
+
+<p>Now we proceed to the final steps of ssh configuration and actuall Hadoop startup.</p>
+
+<h3><a id="ssh">Setup ssh configuration and configure public keys</a></h3>
+
+<p>Configure master:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Generate public key for master node </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-key -t rsa</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Copy public key to slave node</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat ~/.ssh/id_rsa.pub | ssh 192.168.17.2 &lsquo;cat >> .ssh/authorized_keys&rsquo;</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Now same for slave:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Generate public key for slave node </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-key -t rsa</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Copy public key to master node</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat ~/.ssh/id_rsa.pub | ssh 192.168.17.1 &lsquo;cat >> .ssh/authorized_keys&rsquo;</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3><a id="hadoop_startup">Hadoop startup</a></h3>
+
+<p>Now after we have complete all configurations we need to run following commands in terminal on master (192.168.17.1) node:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo ./hadoop namenode -format
+</span><span class='line'>sudo ./start-all.sh</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><a href="http://hadoop.apache.org/docs/stable/cluster_setup.html">Here</a> you can find more details and explanations on how to configure and setup Hadoop cluster.</p>
+
+<p>Obviously it&rsquo;s ridiculous to proceed all these steps each time I need to setup new Hadoop cluster, so in my next blog post I&rsquo;ll write how-to setup Hadoop cluster using <a href="http://www.vagrantup.com/">vagrant</a> and <a href="http://puppetlabs.com/">puppet</a> to enable automation of this procedure.</p>
+]]></content>
+  </entry>
+  
+</feed>
