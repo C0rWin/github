@@ -1,0 +1,3 @@
+[submodule "octopress-category-list"]
+	path = octopress-category-list
+	url = https://github.com/ctdk/octopress-category-list.git
