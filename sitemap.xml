@@ -2,18 +2,24 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://pensieve.info/blog/2013/09/21/setup-hadoop-cluster/</loc>
-        <lastmod>2013-09-21T19:24:05+03:00</lastmod>
+        <lastmod>2013-09-22T00:44:57+03:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/
+        </loc>
+        <lastmod>2013-09-22T02:50:13+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/blog/archives/</loc>
-        <lastmod>2013-09-21T19:24:05+03:00</lastmod>
+        <lastmod>2013-09-22T02:50:13+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/</loc>
-        <lastmod>2013-09-21T19:24:05+03:00</lastmod>
+        <lastmod>2013-09-22T02:50:13+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/robots.txt</loc>
-        <lastmod>2013-08-19T18:40:27+03:00</lastmod>
+        <lastmod>2013-09-22T00:44:32+03:00</lastmod>
     </url>
 </urlset>

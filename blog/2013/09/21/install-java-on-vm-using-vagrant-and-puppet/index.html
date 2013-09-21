@@ -1,24 +1,138 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Short notes]]></title>
-  <link href="http://pensieve.info/atom.xml" rel="self"/>
-  <link href="http://pensieve.info/"/>
-  <updated>2013-09-22T02:50:39+03:00</updated>
-  <id>http://pensieve.info/</id>
-  <author>
-    <name><![CDATA[C0rWin]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Install Java on VM using Vagrant and Puppet - Short notes</title>
+  <meta name="author" content="C0rWin">
 
   
-  <entry>
-    <title type="html"><![CDATA[Install Java on VM using Vagrant and Puppet]]></title>
-    <link href="http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/"/>
-    <updated>2013-09-21T23:25:00+03:00</updated>
-    <id>http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet</id>
-    <content type="html"><![CDATA[<p>As part of my work I need to be able to test different Java Web applications. I need to be able to run some tests on more then only single computer, hence I need rapid way of setting up several Linux based computers/servers with configured Java running, usually I&rsquo;m using Ubuntu based destributives.</p>
+  <meta name="description" content="">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/syntax/syntax.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+      padding-bottom: 40px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    img {
+      max-width: 100%;
+    }
+    .sharing, .meta, .pager {
+      margin: 20px 0px 20px 0px;
+    }
+    .page-footer p {
+      text-align: center;
+    }
+  </style>
+  <script src="/javascripts/libs/jquery.js"></script>
+  <script src="/javascripts/libs/modernizr-2.0.js"></script>
+  <script src="/javascripts/libs/bootstrap.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Short notes" type="application/atom+xml">
+  
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-44230239-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <nav role="navigation"><div class="navbar navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+
+      <a class="brand" href="/">Short notes</a>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+
+        <ul class="nav pull-right" data-subscription="rss">
+          <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+          
+        </ul>
+
+        
+          <form class="pull-right navbar-search" action="http://google.com/search" method="get">
+            <fieldset role="search">
+              <input type="hidden" name="q" value="site:pensieve.info" />
+              <input class="search-query" type="text" name="q" results="0" placeholder="Search"/>
+            </fieldset>
+          </form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</nav>
+  <div class="container">
+    <div class="row-fluid">
+      
+<article class="hentry span9" role="article">
+
+  
+  <header class="page-header">
+    
+      <h1 class="entry-title">Install Java on VM Using Vagrant and Puppet</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-21T23:25:00+03:00" pubdate data-updated="true">Sep 21<span>st</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>As part of my work I need to be able to test different Java Web applications. I need to be able to run some tests on more then only single computer, hence I need rapid way of setting up several Linux based computers/servers with configured Java running, usually I&rsquo;m using Ubuntu based destributives.</p>
 
 <p>Therefore I&rsquo;ve choose the winning couple of <a href="http://puppetlabs.com/">Puppet</a> and <a href="http://www.vagrantup.com/">Vagrant</a>. You&rsquo;re more than welcome to read about these tools and I&rsquo;ll skip the installation guide for them, since google has pleanty of different tutorials explaning how to do it for different platform, so you just need to pick the right one for you.</p>
 
@@ -256,264 +370,175 @@
 
 
 <h3>6. Enjoy!</h3>
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-  <entry>
-    <title type="html"><![CDATA[Setup hadoop cluster]]></title>
-    <link href="http://pensieve.info/blog/2013/09/21/setup-hadoop-cluster/"/>
-    <updated>2013-09-21T01:10:00+03:00</updated>
-    <id>http://pensieve.info/blog/2013/09/21/setup-hadoop-cluster</id>
-    <content type="html"><![CDATA[<p>Recently I&rsquo;ve required to execute some heavy clustering computation on relatively big dataset. Since <a href="http://mahout.apache.org/">Mahout</a> (scalable machine learning framework) already has all required capabilities and holds implementation of base clustering algorithm, I&rsquo;ve decide to use it as a start point and bacause <a href="http://mahout.apache.org/">Mahout</a> is <a href="http://hadoop.apache.org/">Hadoop</a> based I&rsquo;ve had to setup cluster of <a href="http://hadoop.apache.org/">Hadoop</a> nodes to be able to execute my clustering task.</p>
 
-<p>So here I&rsquo;ll try to memorize steps which required for distributed setup of hadoop cluster, for sake of simplicity I&rsquo;ll described setup for only two nodes: master and slave. In this blog post I am going to describe manual install and configuration, while in the next I&rsquo;ll describe the automation configuration and install using <a href="http://puppetlabs.com/">puppet</a> and <a href="http://www.vagrantup.com/">vagrant</a> tools.  I will describe the installation process in context of Ubuntu 12.10 server, while I belive same steps will work for other distirbutives as well.</p>
+<span class="byline author vcard">Posted by <span class="fn">C0rWin</span></span>
 
-<!-- more -->
+      
 
 
-<p>Here is the steps required for Hadoop install and configuration in order to be able to execute distributed tasks on cluster nodes:</p>
 
-<ol>
-<li><a href="#java_download_install">Java download and installation</a>.</li>
-<li><a href="#hadoop_install">Download Hadoop and setup</a>.</li>
-<li><a href="#ssh">Setup ssh configuration and configure public keys</a>.</li>
-<li><a href="#hadoop_startup">Hadoop startup</a>.</li>
-</ol>
 
 
-<h3><a id="java_download_install">Java download and installation.</a></h3>
 
-<p>Bellow steps has to be performed for each node in cluster in order to make sure each one has recent Oracle Java JDK installed.</p>
 
-<ul>
-<li>Download recent Java JDK for Linux distribution from Oracle official <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">site</a>. By the time writing this post recent tar gz was <em>jdk-7u40-linux-i586.tar.gz</em>.</li>
-<li>Extract files from archive, run following command in terminal:</li>
-</ul>
 
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>tar xfv jdk-7u40-linux-i586.tar.gz</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Move extracted folder:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo mv jdk1.7.0_40 /usr/lib/jvm/jdk1.7.0_40</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Update alternatives, install setup aliases for new Java jdk:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo update-alternatives --install /bin/java java /usr/lib/jvm/jdk1.7.0_40/bin/java 1
-</span><span class='line'>sudo update-alternatives --install /bin/javac javac /usr/lib/jvm/jdk1.7.0_40/bin/javac 1</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Make installed aliases active:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo update-alternatives --set java /usr/lib/jvm/jdk1.7.0_40/bin/java
-</span><span class='line'>sudo update-alternatives --set javac /usr/lib/jvm/jdk1.7.0_40/bin/javac</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Configure <strong>$JAVA_HOME</strong>:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo touch /etc/profile.d/java.sh
-</span><span class='line'>sudo -c 'echo "export JAVA_HOME=/usr/lib/jvm/jdk1.7.0_40/" >> /etc/profile.d/java.sh'
-</span><span class='line'>sudo -c 'echo "export PATH=$PATH:$JAVA_HOME/bin" >> /etc/profile.d/java.sh'</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><a id="hadoop_install">Download Hadoop distribution</a></h3>
-
-<ul>
-<li>Download Hadoop from releases <a href="http://apache.spd.co.il/hadoop/common/">site</a>, choose last stable version.</li>
-<li>Extract downloaded files into home folder:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>tar xfv hadoop-1.2.1.tar.gz</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Configure <strong>$HADOOP_HOME</strong>:</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo touch /etc/profile.d/hadoop.sh
-</span><span class='line'>sudo -c 'echo "export HADOOP_HOME=~/hadoop-1.2.0/" >> /etc/profile.d/hadoop.sh'
-</span><span class='line'>sudo -c 'echo "export PATH=$PATH:$HADOOP_HOME/bin" >> /etc/profile.d/hadoop.sh'</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now for next few steps assume we have two computer with IP addresses as follow: <strong>192.168.17.1</strong> (master) and <strong>192.168.17.2</strong> (slave).</p>
-
-<ul>
-<li>Open file $HADOOP_HOME/conf/core-site.xml and write content:</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>core-site.xml</span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
-</span><span class='line'><span class="cp">&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;configuration&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;property&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;name&gt;</span>fs.default.name<span class="nt">&lt;/name&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;value&gt;</span>hdfs://192.168.17.1:9000<span class="nt">&lt;/value&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;description&gt;</span>The name of the default file system. A URI whose scheme and authority determine the FileSystem implementation.<span class="nt">&lt;/description&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/property&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/configuration&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Next open $HADOOP_HOME/conf/hdfs-site.xml and write content:</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>hdfs-site.xml</span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
-</span><span class='line'><span class="cp">&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;</span>
-</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;property&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;name&gt;</span>dfs.replication<span class="nt">&lt;/name&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;value&gt;</span>1<span class="nt">&lt;/value&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;description&gt;</span>The actual number of replications can be specified when the file is created.<span class="nt">&lt;/description&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/property&gt;</span>
-</span><span class='line'><span class="nt">&lt;/configuration&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Now open $HADOOP_HOME/conf/mapred-site.xml and write content:</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>mapred-site.xml </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
-</span><span class='line'><span class="cp">&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;</span>
-</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;property&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;name&gt;</span>mapred.job.tracker<span class="nt">&lt;/name&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;value&gt;</span>192.168.17.1:9001<span class="nt">&lt;/value&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;description&gt;</span>The host and port that the MapReduce job tracker runs at.<span class="nt">&lt;/description&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/property&gt;</span>
-</span><span class='line'><span class="nt">&lt;/configuration&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>And finally you need to change two more files first $HADOOP_HOME/conf/masters and second is $HADOOP_HOME/conf/slaves, not too hard to guess what should be contet of each one of these:</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>masters </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.17.1</span></code></pre></td></tr></table></div></figure>
-
-
-<p>and</p>
-
-<figure class='code'><figcaption><span>slaves </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.17.1
-</span><span class='line'>192.168.17.2</span></code></pre></td></tr></table></div></figure>
-
-
-<p>I&rsquo;ve putted 192.168.17.1 in both files, since I&rsquo;d like to have master node to execute computational task as well and hold distributed data.</p>
-
-<p>Now we proceed to the final steps of ssh configuration and actuall Hadoop startup.</p>
-
-<h3><a id="ssh">Setup ssh configuration and configure public keys</a></h3>
-
-<p>Configure master:</p>
-
-<figure class='code'><figcaption><span>Generate public key for master node </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-key -t rsa</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>Copy public key to slave node</span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cat ~/.ssh/id_rsa.pub | ssh 192.168.17.2 'cat >> .ssh/authorized_keys'</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now same for slave:</p>
-
-<figure class='code'><figcaption><span>Generate public key for slave node </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-key -t rsa</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>Copy public key to master node</span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>cat ~/.ssh/id_rsa.pub | ssh 192.168.17.1 'cat >> .ssh/authorized_keys'</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><a id="hadoop_startup">Hadoop startup</a></h3>
-
-<p>Now after we have complete all configurations we need to run following commands in terminal on master (192.168.17.1) node:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo ./hadoop namenode -format
-</span><span class='line'>sudo ./start-all.sh</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="http://hadoop.apache.org/docs/stable/cluster_setup.html">Here</a> you can find more details and explanations on how to configure and setup Hadoop cluster.</p>
-
-<p>Obviously it&rsquo;s ridiculous to proceed all these steps each time I need to setup new Hadoop cluster, so in my next blog post I&rsquo;ll write how-to setup Hadoop cluster using <a href="http://www.vagrantup.com/">vagrant</a> and <a href="http://puppetlabs.com/">puppet</a> to enable automation of this procedure.</p>
-]]></content>
-  </entry>
   
-</feed>
+
+
+<time datetime="2013-09-21T23:25:00+03:00" pubdate data-updated="true">Sep 21<span>st</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/automation/'>automation</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/puppet/'>puppet</a>, <a class='category' href='/blog/categories/scripts/'>scripts</a>, <a class='category' href='/blog/categories/vagrant/'>vagrant</a>, <a class='category' href='/blog/categories/virtualization/'>virtualization</a>, <a class='category' href='/blog/categories/vm/'>vm</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/" data-via="C0rWin" data-counturl="http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    
+    <section>
+      <h1>Comments</h1>
+      <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </section>
+    
+    <ul class="pager">
+      
+      <li class="previous"><a class="basic-alignment left"
+        href="/blog/2013/09/21/setup-hadoop-cluster/" title="Previous Post:
+        Setup hadoop cluster">&laquo; Setup hadoop cluster</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+    </ul>
+  </footer>
+</article>
+
+<aside class="sidebar-nav span3">
+  
+    <section class="well">
+  <ul id="recent_posts" class="nav nav-list">
+    <li class="nav-header">Recent Posts</li>
+    
+      <li class="post">
+        <a href="/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/">Install Java on VM using Vagrant and Puppet</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/09/21/setup-hadoop-cluster/">Setup hadoop cluster</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section class="well">
+  <ul id="gh_repos" class="nav">
+    <li class="nav-header">GitHub Repos</li>
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/C0rWin">@C0rWin</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        github.showRepos({
+            user: 'C0rWin',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/asides/github.js" type="text/javascript"> </script>
+</section>
+
+<section class="well">
+	<ul id="top-categoty-list" class="nav nav-list">
+				<li class="nav-header">Top Categories</li>
+				<ul><li><a href='/blog/categories/distributed'>distributed (1)</a></li><li><a href='/blog/categories/cluster'>cluster (1)</a></li><li><a href='/blog/categories/how-to'>how-to (1)</a></li><li><a href='/blog/categories/hadoop'>hadoop (1)</a></li><li><a href='/blog/categories/automation'>automation (1)</a></li><li><a href='/blog/categories/virtualization'>virtualization (1)</a></li><li><a href='/blog/categories/scripts'>scripts (1)</a></li><li><a href='/blog/categories/puppet'>puppet (1)</a></li><li><a href='/blog/categories/vm'>vm (1)</a></li><li><a href='/blog/categories/vagrant'>vagrant (1)</a></li></ul>
+	</ul>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/103540838953598223632?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" class="page-footer"><hr>
+<p>
+  Copyright &copy; 2013 - C0rWin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'c0rwinnotes';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/';
+        var disqus_url = 'http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

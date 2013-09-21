@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: virtualization | Short notes]]></title>
+  <link href="http://pensieve.info/blog/categories/virtualization/atom.xml" rel="self"/>
+  <link href="http://pensieve.info/"/>
+  <updated>2013-09-22T02:50:39+03:00</updated>
+  <id>http://pensieve.info/</id>
+  <author>
+    <name><![CDATA[C0rWin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Install Java on VM using Vagrant and Puppet]]></title>
+    <link href="http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/"/>
+    <updated>2013-09-21T23:25:00+03:00</updated>
+    <id>http://pensieve.info/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet</id>
+    <content type="html"><![CDATA[<p>As part of my work I need to be able to test different Java Web applications. I need to be able to run some tests on more then only single computer, hence I need rapid way of setting up several Linux based computers/servers with configured Java running, usually I&rsquo;m using Ubuntu based destributives.</p>
+
+<p>Therefore I&rsquo;ve choose the winning couple of <a href="http://puppetlabs.com/">Puppet</a> and <a href="http://www.vagrantup.com/">Vagrant</a>. You&rsquo;re more than welcome to read about these tools and I&rsquo;ll skip the installation guide for them, since google has pleanty of different tutorials explaning how to do it for different platform, so you just need to pick the right one for you.</p>
+
+<!-- more -->
+
+
+<p>I&rsquo;m going to show how to leverage <a href="http://puppetlabs.com/">Puppet</a> modules architecture, how to implement new module which will be capable to install and configure Java for new VM machine. To learn more about modules in <a href="http://puppetlabs.com/">Puppet</a>, please take a look on <a href="http://docs.puppetlabs.com/puppet/2.7/reference/modules_fundamentals.html">modules fundamentals</a> article on <a href="http://puppetlabs.com/">Puppet</a> labs site.</p>
+
+<h3>1. Download Java.</h3>
+
+<p>Very first step which has to be done, is to download tar gz archive of Java JDK or (JRE), from Oracle official <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">site</a>. By the time I&rsquo;m writting this post current lates JDK tar gz is <em>jdk-7u40-linux-i586.tar.gz</em>.</p>
+
+<h3>2. Create new Puppet module.</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p modules/java/{files,manifests}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>3. Copy Java JDK into module folders.</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp jdk-7u40-linux-i586.tar.gz modules/java/files/</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>4. Write module implementation.</h3>
+
+<ul>
+<li>Create <em>init.pp</em> file within <strong>manifests</strong> folder
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal WIndow </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>touch modules/java/manifests/init.pp</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li><p>Now we need to write down following content:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>init.pp  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">java</span> <span class="p">{</span>
+</span><span class='line'>  <span class="vg">$java_archive</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">jdk</span><span class="o">-</span><span class="mi">7</span><span class="n">u40</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x64</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="vg">$java_home</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">7</span><span class="o">.</span><span class="mo">0_40</span><span class="o">/&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="vg">$java_folder</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">7</span><span class="o">.</span><span class="mo">0_40</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  Exec {</span>
+</span><span class='line'><span class="sr">      path =&gt; [ &amp;ldquo;/us</span><span class="n">r</span><span class="o">/</span><span class="n">bin</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">bin</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  file { &amp;ldquo;/</span><span class="n">tmp</span><span class="o">/</span><span class="err">$</span><span class="p">{</span><span class="n">java_archive</span><span class="p">}</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="p">:</span>
+</span><span class='line'>      <span class="k">ensure</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">present</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span>
+</span><span class='line'>      <span class="n">source</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="ss">puppet</span><span class="p">:</span><span class="sr">//</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="err">$</span><span class="p">{</span><span class="n">java_archive</span><span class="p">}</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span>
+</span><span class='line'>      <span class="n">owner</span>  <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">mode</span>   <span class="o">=&gt;</span> <span class="mi">755</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  exec { &amp;lsquo;extract jdk&amp;rsquo;:</span>
+</span><span class='line'><span class="sr">      cwd =&gt; &amp;lsquo;/</span><span class="n">tmp</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span>
+</span><span class='line'>      <span class="n">command</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">tar</span> <span class="n">xfv</span> <span class="err">$</span><span class="p">{</span><span class="n">java_archive</span><span class="p">}</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span>
+</span><span class='line'>      <span class="n">creates</span> <span class="o">=&gt;</span> <span class="vg">$java_home</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">File</span><span class="o">[&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="err">$</span><span class="p">{</span><span class="n">java_archive</span><span class="p">}</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  file { &amp;lsquo;/us</span><span class="n">r</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="p">:</span>
+</span><span class='line'>      <span class="k">ensure</span> <span class="o">=&gt;</span> <span class="n">directory</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">extract</span> <span class="n">jdk</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  exec { &amp;lsquo;move jdk&amp;rsquo;:</span>
+</span><span class='line'><span class="sr">      cwd =&gt; &amp;lsquo;/</span><span class="n">tmp</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span>
+</span><span class='line'>      <span class="n">creates</span> <span class="o">=&gt;</span> <span class="vg">$java_home</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">File</span><span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">command</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">mv</span> <span class="err">$</span><span class="p">{</span><span class="n">java_folder</span><span class="p">}</span> <span class="sr">/usr/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  exec {&amp;lsquo;install java&amp;rsquo;:</span>
+</span><span class='line'><span class="sr">      require =&gt; Exec[&amp;lsquo;move jdk&amp;rsquo;],</span>
+</span><span class='line'><span class="sr">      logoutput =&gt; true,</span>
+</span><span class='line'><span class="sr">      command =&gt; &amp;ldquo;update-alternatives &amp;mdash;install /</span><span class="n">bin</span><span class="o">/</span><span class="n">java</span> <span class="n">java</span> <span class="err">$</span><span class="p">{</span><span class="n">java_home</span><span class="p">}</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">java</span> <span class="mi">1</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  exec {&amp;lsquo;set java&amp;rsquo;:</span>
+</span><span class='line'><span class="sr">      require =&gt; Exec[&amp;lsquo;install java&amp;rsquo;],</span>
+</span><span class='line'><span class="sr">      logoutput =&gt; true,</span>
+</span><span class='line'><span class="sr">      command =&gt; &amp;ldquo;update-alternatives &amp;mdash;set java ${java_home}/</span><span class="n">bin</span><span class="o">/</span><span class="n">java</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  exec {&amp;lsquo;install javac&amp;rsquo;:</span>
+</span><span class='line'><span class="sr">      require =&gt; Exec[&amp;lsquo;move jdk&amp;rsquo;],</span>
+</span><span class='line'><span class="sr">      logoutput =&gt; true,</span>
+</span><span class='line'><span class="sr">      command =&gt; &amp;ldquo;update-alternatives &amp;mdash;install /</span><span class="n">bin</span><span class="o">/</span><span class="n">javac</span> <span class="n">javac</span> <span class="err">$</span><span class="p">{</span><span class="n">java_home</span><span class="p">}</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">javac</span> <span class="mi">1</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  exec {&amp;lsquo;set javac&amp;rsquo;:</span>
+</span><span class='line'><span class="sr">      require =&gt; Exec[&amp;lsquo;install javac&amp;rsquo;],</span>
+</span><span class='line'><span class="sr">      logoutput =&gt; true,</span>
+</span><span class='line'><span class="sr">      command =&gt; &amp;ldquo;update-alternatives &amp;mdash;set javac ${java_home}/</span><span class="n">bin</span><span class="o">/</span><span class="n">javac</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>5. Run and test new module.</h3></li>
+<li><p>Run:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vagrant init</span></code></pre></td></tr></table></div></figure></notextile></div></p></li>
+<li>Edit Vagrantfile, put following content:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Vagrantfile </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">Vagrant</span><span class="p">:</span><span class="ss">:Config</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="ss">:test_vm</span> <span class="k">do</span> <span class="o">|</span><span class="n">test_vm</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">test_vm</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">ubuntu</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">test_vm</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:hostonly</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">10</span><span class="o">.</span><span class="mi">71</span><span class="o">.</span><span class="mi">71</span><span class="o">.</span><span class="mi">10</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">test_vm</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">modifyvm</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">:id</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&amp;</span><span class="n">mdash</span><span class="p">;</span><span class="n">memory</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">1024</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">test_vm</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:puppet</span> <span class="k">do</span> <span class="o">|</span><span class="n">puppet</span><span class="o">|</span>
+</span><span class='line'>              <span class="n">puppet</span><span class="o">.</span><span class="n">module_path</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">~</span><span class="sr">/vagrant/m</span><span class="n">anifests</span><span class="o">/&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>              <span class="n">puppet</span><span class="o">.</span><span class="n">module_path</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">modules</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>              <span class="n">puppet</span><span class="o">.</span><span class="n">manifests_path</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">manifests</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>              <span class="n">puppet</span><span class="o">.</span><span class="n">manifest_file</span>  <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">test_vm</span><span class="o">.</span><span class="n">pp</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Create <em>manifests</em> folder and <em>test_vm.pp</em>:
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir manifests &amp;&amp; touch manifests/test_vm.pp
+</span><span class='line'>echo &ldquo;include java&rdquo; >> manifests/test_vm.pp</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+<li>Run VM
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vagrant up test_vm</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+</ul>
+
+
+<h3>6. Enjoy!</h3>
+]]></content>
+  </entry>
+  
+</feed>
