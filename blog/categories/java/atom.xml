@@ -4,7 +4,7 @@
   <title><![CDATA[Category: java | Short notes]]></title>
   <link href="http://pensieve.info/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-09-22T23:24:00+03:00</updated>
+  <updated>2013-09-23T01:25:55+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -112,6 +112,11 @@
 <span class='line-number'>58</span>
 <span class='line-number'>59</span>
 <span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">java</span> <span class="p">{</span>
 </span><span class='line'>  <span class="vg">$java_archive</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">jdk</span><span class="o">-</span><span class="mi">7</span><span class="n">u40</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x64</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
 </span><span class='line'>  <span class="vg">$java_home</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">7</span><span class="o">.</span><span class="mo">0_40</span><span class="o">/&amp;</span><span class="n">rdquo</span><span class="p">;</span>
@@ -170,6 +175,11 @@
 </span><span class='line'><span class="sr">      require =&gt; Exec[&amp;lsquo;install javac&amp;rsquo;],</span>
 </span><span class='line'><span class="sr">      logoutput =&gt; true,</span>
 </span><span class='line'><span class="sr">      command =&gt; &amp;ldquo;update-alternatives &amp;mdash;set javac ${java_home}/</span><span class="n">bin</span><span class="o">/</span><span class="n">javac</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  file { &amp;ldquo;/e</span><span class="n">tc</span><span class="o">/</span><span class="n">profile</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">java</span><span class="o">.</span><span class="n">sh</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;:</span>
+</span><span class='line'>      <span class="n">content</span> <span class="o">=&gt;</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">export</span> <span class="no">JAVA_HOME</span><span class="o">=</span><span class="err">$</span><span class="p">{</span><span class="n">java_home</span><span class="p">}</span>
+</span><span class='line'>                   <span class="n">export</span> <span class="no">PATH</span><span class="o">=</span><span class="p">\</span><span class="vg">$PATH</span><span class="p">:\</span><span class="vg">$JAVA_HOME</span><span class="o">/</span><span class="n">bin</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>

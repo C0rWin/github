@@ -238,6 +238,11 @@
 <span class='line-number'>58</span>
 <span class='line-number'>59</span>
 <span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">java</span> <span class="p">{</span>
 </span><span class='line'>    <span class="vg">$java_archive</span> <span class="o">=</span> <span class="s2">&quot;jdk-7u40-linux-x64.tar.gz&quot;</span>
 </span><span class='line'>    <span class="vg">$java_home</span> <span class="o">=</span> <span class="s2">&quot;/usr/lib/jvm/jdk1.7.0_40/&quot;</span>
@@ -297,6 +302,11 @@
 </span><span class='line'>        <span class="n">logoutput</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span>
 </span><span class='line'>        <span class="n">command</span> <span class="o">=&gt;</span> <span class="s2">&quot;update-alternatives --set javac ${java_home}/bin/javac&quot;</span>
 </span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/etc/profile.d/java.sh&quot;</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">content</span> <span class="o">=&gt;</span> <span class="s2">&quot;export JAVA_HOME=${java_home}</span>
+</span><span class='line'><span class="s2">                  export PATH=\$PATH:\$JAVA_HOME/bin&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -429,6 +439,10 @@
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
+      <li class="next"><a class="basic-alignment right" href="/blog/2013/09/22/install-maven-on-vm-with-puppet/"
+        title="Next Post: Install Maven on VM with Puppet">Install Maven on VM with Puppet
+        &raquo;</a></li>
+      
     </ul>
   </footer>
 </article>
@@ -438,6 +452,10 @@
     <section class="well">
   <ul id="recent_posts" class="nav nav-list">
     <li class="nav-header">Recent Posts</li>
+    
+      <li class="post">
+        <a href="/blog/2013/09/22/install-maven-on-vm-with-puppet/">Install Maven on VM with Puppet</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/">Install Java on VM using Vagrant and Puppet</a>
@@ -474,7 +492,7 @@
 <section class="well">
 	<ul id="top-categoty-list" class="nav nav-list">
 				<li class="nav-header">Top Categories</li>
-				<ul><li><a href='/blog/categories/distributed'>distributed (1)</a></li><li><a href='/blog/categories/cluster'>cluster (1)</a></li><li><a href='/blog/categories/how-to'>how-to (1)</a></li><li><a href='/blog/categories/hadoop'>hadoop (1)</a></li><li><a href='/blog/categories/automation'>automation (1)</a></li><li><a href='/blog/categories/virtualization'>virtualization (1)</a></li><li><a href='/blog/categories/scripts'>scripts (1)</a></li><li><a href='/blog/categories/puppet'>puppet (1)</a></li><li><a href='/blog/categories/vm'>vm (1)</a></li><li><a href='/blog/categories/vagrant'>vagrant (1)</a></li></ul>
+				<ul><li><a href='/blog/categories/automation'>automation (2)</a></li><li><a href='/blog/categories/vagrant'>vagrant (2)</a></li><li><a href='/blog/categories/vm'>vm (2)</a></li><li><a href='/blog/categories/puppet'>puppet (2)</a></li><li><a href='/blog/categories/scripts'>scripts (2)</a></li><li><a href='/blog/categories/virtualization'>virtualization (2)</a></li><li><a href='/blog/categories/maven'>maven (1)</a></li><li><a href='/blog/categories/hadoop'>hadoop (1)</a></li><li><a href='/blog/categories/how-to'>how-to (1)</a></li><li><a href='/blog/categories/cluster'>cluster (1)</a></li></ul>
 	</ul>
 </section>
 

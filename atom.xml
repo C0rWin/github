@@ -4,7 +4,7 @@
   <title><![CDATA[Short notes]]></title>
   <link href="http://pensieve.info/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-09-22T23:24:00+03:00</updated>
+  <updated>2013-09-23T01:25:55+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -12,6 +12,145 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Install Maven on VM with Puppet]]></title>
+    <link href="http://pensieve.info/blog/2013/09/22/install-maven-on-vm-with-puppet/"/>
+    <updated>2013-09-22T23:26:00+03:00</updated>
+    <id>http://pensieve.info/blog/2013/09/22/install-maven-on-vm-with-puppet</id>
+    <content type="html"><![CDATA[<p>In my <a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">previous</a> post I&rsquo;ve explained how to setup Java on virtual machine using <a href="http://puppetlabs.com/">Puppet</a>. Now it&rsquo;s a time to make it for maven, basically most of the steps are the same.</p>
+
+<!-- more -->
+
+
+<h3>1. Download maven archive.</h3>
+
+<p>Visit Apache <a href="http://maven.apache.org/download.cgi">Maven site</a> and download recent binary tar gz archived maven version.</p>
+
+<h3>2. Create maven puppet module folders.</h3>
+
+<p>Execute following terminal command in your working directory:</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p modules/maven/{files,manifests}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And copy downloaded maven binaries archive (apache-maven-3.1.0-bin.tar.gz in my case) into files sub-folder:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp apache-maven-3.1.0-bin.tar.gz modules/maven/files/</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3. Write down configuration script.</h3>
+
+<p>Create <em>init.pp</em> files inside manifests folder</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>touch modules/maven/manifests/init.pp</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now let&rsquo;s put there following implementation:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">maven</span> <span class="p">{</span>
+</span><span class='line'>  <span class="vg">$maven_home</span> <span class="o">=</span> <span class="s2">&quot;/usr/lib/maven&quot;</span>
+</span><span class='line'>  <span class="vg">$maven_archive</span> <span class="o">=</span> <span class="s2">&quot;apache-maven-3.1.0-bin.tar.gz&quot;</span>
+</span><span class='line'>  <span class="vg">$maven_folder</span> <span class="o">=</span> <span class="s2">&quot;apache-maven-3.1.0&quot;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="no">Exec</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">path</span> <span class="o">=&gt;</span> <span class="o">[</span> <span class="s2">&quot;/usr/bin&quot;</span><span class="p">,</span> <span class="s2">&quot;/bin&quot;</span><span class="p">,</span> <span class="s2">&quot;/usr/sbin&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/tmp/${maven_archive}&quot;</span><span class="p">:</span>
+</span><span class='line'>      <span class="k">ensure</span> <span class="o">=&gt;</span> <span class="n">present</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">source</span> <span class="o">=&gt;</span> <span class="s2">&quot;puppet:///modules/maven/${maven_archive}&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">755</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="nb">exec</span> <span class="p">{</span> <span class="s2">&quot;extract maven&quot;</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">command</span> <span class="o">=&gt;</span> <span class="s2">&quot;tar xfv ${maven_archive}&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">cwd</span> <span class="o">=&gt;</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">creates</span> <span class="o">=&gt;</span> <span class="s2">&quot;${maven_home}&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">File</span><span class="o">[</span><span class="s2">&quot;/tmp/${maven_archive}&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">exec</span> <span class="p">{</span> <span class="s2">&quot;move maven&quot;</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">command</span> <span class="o">=&gt;</span> <span class="s2">&quot;mv ${maven_folder} ${maven_home}&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">creates</span> <span class="o">=&gt;</span> <span class="s2">&quot;${maven_home}&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="n">cwd</span> <span class="o">=&gt;</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[</span><span class="s2">&quot;extract maven&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/etc/profile.d/maven.sh&quot;</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">content</span> <span class="o">=&gt;</span>   <span class="s2">&quot;export MAVEN_HOME=${maven_home}</span>
+</span><span class='line'><span class="s2">                   export M2=\$MAVEN_HOME/bin</span>
+</span><span class='line'><span class="s2">                   export PATH=\$PATH:\$M2</span>
+</span><span class='line'><span class="s2">                   export MAVEN_OPTS=</span><span class="se">\&quot;</span><span class="s2">-Xmx512m -Xms512m</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4. Put everything together.</h3>
+
+<p>I&rsquo;ll continue to use Vagrantfile and manifest from <a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">previous</a> post, therefore in order to test my new puppet script for maven install I&rsquo;ll just use already create test_vm.pp and add following lines:</p>
+
+<figure class='code'><figcaption><span>Terminal WIndow </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo "include maven" >> manifests/test_vm.pp</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>5. Reload VM (or start).</h3>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vagrant reload test_vm</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>6. Enjoy!</h3>
+
+<p> In my next post I&rsquo;ll finilize and put together current result with script from my <a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">previous</a> post in order to implement scripts which will enable to setup Hadoop cluster on VM. Therefore all I&rsquo;ve described in my <a href="blog/2013/09/21/setup-hadoop-cluster/">first</a> post could be easily automated.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Install Java on VM using Vagrant and Puppet]]></title>
@@ -123,6 +262,11 @@
 <span class='line-number'>58</span>
 <span class='line-number'>59</span>
 <span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">java</span> <span class="p">{</span>
 </span><span class='line'>    <span class="vg">$java_archive</span> <span class="o">=</span> <span class="s2">&quot;jdk-7u40-linux-x64.tar.gz&quot;</span>
 </span><span class='line'>    <span class="vg">$java_home</span> <span class="o">=</span> <span class="s2">&quot;/usr/lib/jvm/jdk1.7.0_40/&quot;</span>
@@ -182,6 +326,11 @@
 </span><span class='line'>        <span class="n">logoutput</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span>
 </span><span class='line'>        <span class="n">command</span> <span class="o">=&gt;</span> <span class="s2">&quot;update-alternatives --set javac ${java_home}/bin/javac&quot;</span>
 </span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/etc/profile.d/java.sh&quot;</span><span class="p">:</span>
+</span><span class='line'>      <span class="n">content</span> <span class="o">=&gt;</span> <span class="s2">&quot;export JAVA_HOME=${java_home}</span>
+</span><span class='line'><span class="s2">                  export PATH=\$PATH:\$JAVA_HOME/bin&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
