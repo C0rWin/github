@@ -2,7 +2,7 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://pensieve.info/blog/2013/09/21/setup-hadoop-cluster/</loc>
-        <lastmod>2013-09-22T09:53:34+03:00</lastmod>
+        <lastmod>2013-09-23T01:30:37+03:00</lastmod>
     </url>
     <url>
         <loc>
@@ -16,11 +16,11 @@
     </url>
     <url>
         <loc>http://pensieve.info/blog/archives/</loc>
-        <lastmod>2013-09-23T01:25:14+03:00</lastmod>
+        <lastmod>2013-09-23T01:30:37+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/</loc>
-        <lastmod>2013-09-23T01:25:14+03:00</lastmod>
+        <lastmod>2013-09-23T01:30:37+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/robots.txt</loc>
