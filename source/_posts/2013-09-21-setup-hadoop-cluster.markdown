@@ -5,7 +5,7 @@ date: 2013-09-21 01:10
 comments: true
 categories: hadoop how-to cluster distributed
 ---
-Recently I've required to execute some heavy clustering computation on relatively big dataset. Since [Mahout][mahout] (scalable machine learning framework) already has all required capabilities and holds implementation of base clustering algorithm, I've decide to use it as a start point and bacause [Mahout][mahout] is [Hadoop][hadoop] based I've had to setup cluster of [Hadoop][hadoop] nodes to be able to execute my clustering task.
+Recently I've required to execute some heavy clustering computation on relatively big dataset. Since [Mahout][mahout] (scalable machine learning framework) already has all required capabilities and holds implementation of base clustering algorithm, I've decided to use it as a start point and because [Mahout][mahout] is [Hadoop][hadoop] based I've had to setup cluster of [Hadoop][hadoop] nodes to be able to execute my clustering task.
 
 So here I'll try to memorize steps which required for distributed setup of hadoop cluster, for sake of simplicity I'll described setup for only two nodes: master and slave. In this blog post I am going to describe manual install and configuration, while in the next I'll describe the automation configuration and install using [puppet][puppet] and [vagrant][vagrant] tools.  I will describe the installation process in context of Ubuntu 12.10 server, while I belive same steps will work for other distirbutives as well.
 <!-- more -->

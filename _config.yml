@@ -95,6 +95,6 @@ disqus_show_comment_count: true
 
 # Google Analytics
 google_analytics_tracking_id: UA-44230239-1
-
+google_analytics_host_name: pensieve.info
 # Facebook Like
 facebook_like: false
