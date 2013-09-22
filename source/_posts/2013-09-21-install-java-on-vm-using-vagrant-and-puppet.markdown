@@ -89,6 +89,11 @@ class java {
         logoutput => true,
         command => "update-alternatives --set javac ${java_home}/bin/javac"
     }
+    
+	file { "/etc/profile.d/java.sh":
+		content => "export JAVA_HOME=${java_home}
+				  	 export PATH=\$PATH:\$JAVA_HOME/bin"
+	}
 }
 {% endcodeblock %}
 ### 5. Run and test new module.
