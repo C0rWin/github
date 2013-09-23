@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: java | Short notes.]]></title>
+  <title><![CDATA[Category: java | Short notes]]></title>
   <link href="http://pensieve.info/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-09-23T11:40:14+03:00</updated>
+  <updated>2013-09-23T11:41:06+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
