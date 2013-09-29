@@ -27,10 +27,10 @@ touch modules/maven/manifests/init.pp
 {% endcodeblock %}
 Now let's put there following implementation:
 {% codeblock lang:ruby%}
-class maven {
-	$maven_home = "/usr/lib/maven"
-	$maven_archive = "apache-maven-3.1.0-bin.tar.gz"
-	$maven_folder = "apache-maven-3.1.0"
+class maven (
+	$maven_home = "/usr/lib/maven",
+	$maven_archive = "apache-maven-3.1.0-bin.tar.gz",
+	$maven_folder = "apache-maven-3.1.0") {
 	
 	Exec {
 		path => [ "/usr/bin", "/bin", "/usr/sbin"]
@@ -77,6 +77,8 @@ vagrant reload test_vm
 ### 6. Enjoy!
  
  In my next post I'll finilize and put together current result with script from my [previous] post in order to implement scripts which will enable to setup Hadoop cluster on VM. Therefore all I've described in my [first] post could be easily automated.
+
+PS. Here I've changed the puppet script same way as in my [previous] post, to support parametrized class definition to support customization.
 
 [Puppet]: http://puppetlabs.com/
 [Maven]:http://maven.apache.org/download.cgi

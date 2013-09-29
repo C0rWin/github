@@ -30,10 +30,11 @@ touch modules/java/manifests/init.pp
 {% endcodeblock %}
 + Now we need to write down following content:
 {% codeblock init.pp lang:ruby  %}
-class java {
-    $java_archive = "jdk-7u40-linux-x64.tar.gz"
-    $java_home = "/usr/lib/jvm/jdk1.7.0_40/"
-    $java_folder = "jdk1.7.0_40"
+class java(
+    $java_archive = "jdk-7u40-linux-x64.tar.gz",
+    $java_home = "/usr/lib/jvm/jdk1.7.0_40/",
+    $java_folder = "jdk1.7.0_40")  
+    {
 
     Exec {
         path => [ "/usr/bin", "/bin", "/usr/sbin"]
@@ -129,6 +130,16 @@ vagrant up test_vm
 {% endcodeblock %}
 
 ### 6. Enjoy!
+
+PS. Thanks to my friend which pointed me to more nice and clear way of declaring variable in a class in a way it could be customized later with values different from defaults. I've update the post and here you can see the customization example:
+
+{% codeblock test_vm.pp lang:ruby%}
+class java {
+    java_archive : "jdk-8u01-linux-x64.tar.gz",
+    java_home : "/usr/lib/jvm/jdk1.8.0_01/",
+    java_folder : "jdk1.8.0_01")  
+}
+{% endcodeblock %}
 
 [Puppet]:http://puppetlabs.com/
 [puppet_modules]: http://docs.puppetlabs.com/puppet/2.7/reference/modules_fundamentals.html
