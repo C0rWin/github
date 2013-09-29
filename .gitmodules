@@ -1,3 +1,6 @@
 [submodule "octopress-category-list"]
 	path = octopress-category-list
 	url = https://github.com/ctdk/octopress-category-list.git
+[submodule "octopress-responsive-video-embed"]
+	path = octopress-responsive-video-embed
+	url = https://github.com/optikfluffel/octopress-responsive-video-embed.git
