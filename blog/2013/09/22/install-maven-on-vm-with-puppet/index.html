@@ -205,10 +205,10 @@
 <span class='line-number'>35</span>
 <span class='line-number'>36</span>
 <span class='line-number'>37</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">maven</span> <span class="p">{</span>
-</span><span class='line'>  <span class="vg">$maven_home</span> <span class="o">=</span> <span class="s2">&quot;/usr/lib/maven&quot;</span>
-</span><span class='line'>  <span class="vg">$maven_archive</span> <span class="o">=</span> <span class="s2">&quot;apache-maven-3.1.0-bin.tar.gz&quot;</span>
-</span><span class='line'>  <span class="vg">$maven_folder</span> <span class="o">=</span> <span class="s2">&quot;apache-maven-3.1.0&quot;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">maven</span> <span class="p">(</span>
+</span><span class='line'>  <span class="vg">$maven_home</span> <span class="o">=</span> <span class="s2">&quot;/usr/lib/maven&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="vg">$maven_archive</span> <span class="o">=</span> <span class="s2">&quot;apache-maven-3.1.0-bin.tar.gz&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="vg">$maven_folder</span> <span class="o">=</span> <span class="s2">&quot;apache-maven-3.1.0&quot;</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  
 </span><span class='line'>  <span class="no">Exec</span> <span class="p">{</span>
 </span><span class='line'>      <span class="n">path</span> <span class="o">=&gt;</span> <span class="o">[</span> <span class="s2">&quot;/usr/bin&quot;</span><span class="p">,</span> <span class="s2">&quot;/bin&quot;</span><span class="p">,</span> <span class="s2">&quot;/usr/sbin&quot;</span><span class="o">]</span>
@@ -264,6 +264,8 @@
 <h3>6. Enjoy!</h3>
 
 <p> In my next post I&rsquo;ll finilize and put together current result with script from my <a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">previous</a> post in order to implement scripts which will enable to setup Hadoop cluster on VM. Therefore all I&rsquo;ve described in my <a href="blog/2013/09/21/setup-hadoop-cluster/">first</a> post could be easily automated.</p>
+
+<p>PS. Here I&rsquo;ve changed the puppet script same way as in my <a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">previous</a> post, to support parametrized class definition to support customization.</p>
 </div>
 
 
