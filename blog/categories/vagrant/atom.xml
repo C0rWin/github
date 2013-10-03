@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vagrant | Short notes]]></title>
   <link href="http://pensieve.info/blog/categories/vagrant/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-09-30T01:04:12+03:00</updated>
+  <updated>2013-10-03T16:07:11+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -380,11 +380,11 @@ Now let&rsquo;s put there following implementation:
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">java</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">java</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;:</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;java_archive : &quot;jdk-8u01-linux-x64.tar.gz&quot;,</span>
-</span><span class='line'><span class="sr">java_home : &quot;/us</span><span class="n">r</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="o">/</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">java_folder : &quot;</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="s2">&quot;)  </span>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;java_archive =&amp;gt; &quot;jdk-8u01-linux-x64.tar.gz&quot;,</span>
+</span><span class='line'><span class="sr">java_home =&amp;gt; &quot;/us</span><span class="n">r</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="o">/</span><span class="s2">&quot;,</span>
+</span><span class='line'><span class="s2">java_folder =&amp;gt; &quot;</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="s2">&quot;)  </span>
 </span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="s2">&lt;p&gt;}</span>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: puppet | Short notes]]></title>
   <link href="http://pensieve.info/blog/categories/puppet/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-09-30T01:04:12+03:00</updated>
+  <updated>2013-10-03T16:07:11+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Putting all together setup, Hadoop cluster on VM with Puppet.]]></title>
+    <link href="http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/"/>
+    <updated>2013-09-30T00:14:00+03:00</updated>
+    <id>http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet</id>
+    <content type="html"><![CDATA[<p>In my two previous blog post I&rsquo;ve explained:</p>
+
+<ol>
+<li><a href="blog/2013/09/21/setup-hadoop-cluster/">Setup Hadoop cluster</a> &ndash; manual configuration on virtual machines which needed to setup Hadoop cluster.</li>
+<li><a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">Install Java on VM using vagrant and puppet</a> &ndash; I&rsquo;ve started to explain how to leverage vagrant and puppet in order to have Java installed in virtual machine.</li>
+</ol>
+
+
+<p>Now in this post I&rsquo;ll try to explain how-to setup hadoop cluster on virtual environment using vagrant and puppet scripts, so all actions in my first post could be easily automated.</p>
+
+<p> <!-- more --></p>
+
+<p> I&rsquo;m going to use my first two posts as a reference and assume you have downloaded all files needed, moreover you already have puppet module script for java install and configuration.</p>
+
+<p>Start as usual:</p>
+
+<h3>1. Create module folders:</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Widow </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p modules/hadoop/{files,manifests}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>2. Copy hadoop files into module folder:</h3>
+
+<p>As I said I&rsquo;m going to use files from previous <a href="blog/2013/09/21/setup-hadoop-cluster/">post</a>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp hadoop-1.2.1.tar.gz modules/hadoop/files/</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Install Maven on VM with Puppet]]></title>
@@ -380,11 +415,11 @@ Now let&rsquo;s put there following implementation:
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">java</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="p">{</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">java</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;:</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;java_archive : &quot;jdk-8u01-linux-x64.tar.gz&quot;,</span>
-</span><span class='line'><span class="sr">java_home : &quot;/us</span><span class="n">r</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="o">/</span><span class="s2">&quot;,</span>
-</span><span class='line'><span class="s2">java_folder : &quot;</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="s2">&quot;)  </span>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;java_archive =&amp;gt; &quot;jdk-8u01-linux-x64.tar.gz&quot;,</span>
+</span><span class='line'><span class="sr">java_home =&amp;gt; &quot;/us</span><span class="n">r</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="o">/</span><span class="s2">&quot;,</span>
+</span><span class='line'><span class="s2">java_folder =&amp;gt; &quot;</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_01</span><span class="s2">&quot;)  </span>
 </span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="s2">&lt;p&gt;}</span>

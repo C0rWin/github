@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - Short notes</title>
+  <title>Putting all together setup, Hadoop cluster on VM with Puppet. - Short notes</title>
   <meta name="author" content="C0rWin">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://pensieve.info/blog/archives">
+  <link rel="canonical" href="http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -103,100 +103,132 @@
   <div class="container">
     <div class="row-fluid">
       
-<article role="article" class="span9">
+<article class="hentry span9" role="article">
 
   
   <header class="page-header">
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title">Putting All Together Setup, Hadoop Cluster on VM With Puppet.</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-30T00:14:00+03:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
     
   </header>
+
+
+<div class="entry-content"><p>In my two previous blog post I&rsquo;ve explained:</p>
+
+<ol>
+<li><a href="blog/2013/09/21/setup-hadoop-cluster/">Setup Hadoop cluster</a> &ndash; manual configuration on virtual machines which needed to setup Hadoop cluster.</li>
+<li><a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">Install Java on VM using vagrant and puppet</a> &ndash; I&rsquo;ve started to explain how to leverage vagrant and puppet in order to have Java installed in virtual machine.</li>
+</ol>
+
+
+<p>Now in this post I&rsquo;ll try to explain how-to setup hadoop cluster on virtual environment using vagrant and puppet scripts, so all actions in my first post could be easily automated.</p>
+
+<p> <!-- more --></p>
+
+<p> I&rsquo;m going to use my first two posts as a reference and assume you have downloaded all files needed, moreover you already have puppet module script for java install and configuration.</p>
+
+<p>Start as usual:</p>
+
+<h3>1. Create module folders:</h3>
+
+<figure class='code'><figcaption><span>Terminal Widow </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p modules/hadoop/{files,manifests}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2. Copy hadoop files into module folder:</h3>
+
+<p>As I said I&rsquo;m going to use files from previous <a href="blog/2013/09/21/setup-hadoop-cluster/">post</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp hadoop-1.2.1.tar.gz modules/hadoop/files/</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-  
 
+<span class="byline author vcard">Posted by <span class="fn">C0rWin</span></span>
 
-  
-  <h1>2013</h1>
-
-<article>
-  <div class="well">
-
-<h2><a href="/blog/2013/09/30/israel-global-day-of-code-retreat/">Israel Global Day of Code Retreat 2013.</a></h2>
-<time datetime="2013-09-30T00:28:00+03:00" pubdate><span class='month'>Sep</span> <span class='day'>30</span> <span class='year'>2013</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/gdcr-2013/'>GDCR_2013</a>, <a class='category' href='/blog/categories/event/'>event</a></span>
-</footer>
-
-</div>
-
-</article>
+      
 
 
 
-<article>
-  <div class="well">
-
-<h2><a href="/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Putting all together setup, Hadoop cluster on VM with Puppet.</a></h2>
-<time datetime="2013-09-30T00:14:00+03:00" pubdate><span class='month'>Sep</span> <span class='day'>30</span> <span class='year'>2013</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/automation/'>automation</a>, <a class='category' href='/blog/categories/cluster/'>cluster</a>, <a class='category' href='/blog/categories/hadoop/'>hadoop</a>, <a class='category' href='/blog/categories/puppet/'>puppet</a>, <a class='category' href='/blog/categories/scripts/'>scripts</a>, <a class='category' href='/blog/categories/virtualization/'>virtualization</a></span>
-</footer>
-
-</div>
-
-</article>
 
 
 
-<article>
-  <div class="well">
-
-<h2><a href="/blog/2013/09/22/install-maven-on-vm-with-puppet/">Install Maven on VM with Puppet</a></h2>
-<time datetime="2013-09-22T23:26:00+03:00" pubdate><span class='month'>Sep</span> <span class='day'>22</span> <span class='year'>2013</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/automation/'>automation</a>, <a class='category' href='/blog/categories/maven/'>maven</a>, <a class='category' href='/blog/categories/puppet/'>puppet</a>, <a class='category' href='/blog/categories/scripts/'>scripts</a>, <a class='category' href='/blog/categories/vagrant/'>vagrant</a>, <a class='category' href='/blog/categories/virtualization/'>virtualization</a>, <a class='category' href='/blog/categories/vm/'>vm</a></span>
-</footer>
-
-</div>
-
-</article>
-
-
-
-<article>
-  <div class="well">
-
-<h2><a href="/blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet/">Install Java on VM using Vagrant and Puppet</a></h2>
-<time datetime="2013-09-21T23:25:00+03:00" pubdate><span class='month'>Sep</span> <span class='day'>21</span> <span class='year'>2013</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/automation/'>automation</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/puppet/'>puppet</a>, <a class='category' href='/blog/categories/scripts/'>scripts</a>, <a class='category' href='/blog/categories/vagrant/'>vagrant</a>, <a class='category' href='/blog/categories/virtualization/'>virtualization</a>, <a class='category' href='/blog/categories/vm/'>vm</a></span>
-</footer>
-
-</div>
-
-</article>
-
-
-
-<article>
-  <div class="well">
-
-<h2><a href="/blog/2013/09/21/setup-hadoop-cluster/">Setup hadoop cluster</a></h2>
-<time datetime="2013-09-21T01:10:00+03:00" pubdate><span class='month'>Sep</span> <span class='day'>21</span> <span class='year'>2013</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/cluster/'>cluster</a>, <a class='category' href='/blog/categories/distributed/'>distributed</a>, <a class='category' href='/blog/categories/hadoop/'>hadoop</a>, <a class='category' href='/blog/categories/how-to/'>how-to</a></span>
-</footer>
-
-</div>
-
-</article>
 
 
   
+
+
+<time datetime="2013-09-30T00:14:00+03:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/automation/'>automation</a>, <a class='category' href='/blog/categories/cluster/'>cluster</a>, <a class='category' href='/blog/categories/hadoop/'>hadoop</a>, <a class='category' href='/blog/categories/puppet/'>puppet</a>, <a class='category' href='/blog/categories/scripts/'>scripts</a>, <a class='category' href='/blog/categories/virtualization/'>virtualization</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/" data-via="C0rWin" data-counturl="http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    
+    <section>
+      <h1>Comments</h1>
+      <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </section>
+    
+    <ul class="pager">
+      
+      <li class="previous"><a class="basic-alignment left"
+        href="/blog/2013/09/22/install-maven-on-vm-with-puppet/" title="Previous Post:
+        Install Maven on VM with Puppet">&laquo; Install Maven on VM with Puppet</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+      <li class="next"><a class="basic-alignment right" href="/blog/2013/09/30/israel-global-day-of-code-retreat/"
+        title="Next Post: Israel Global Day of Code Retreat 2013.">Israel Global Day of Code Retreat 2013.
+        &raquo;</a></li>
+      
+    </ul>
+  </footer>
 </article>
 
 <aside class="sidebar-nav span3">
@@ -289,7 +321,10 @@
       var disqus_shortname = 'c0rwinnotes';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/';
+        var disqus_url = 'http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
