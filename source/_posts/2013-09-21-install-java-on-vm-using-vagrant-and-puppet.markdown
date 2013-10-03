@@ -134,10 +134,10 @@ vagrant up test_vm
 PS. Thanks to my friend which pointed me to more nice and clear way of declaring variable in a class in a way it could be customized later with values different from defaults. I've update the post and here you can see the customization example:
 
 {% codeblock test_vm.pp lang:ruby%}
-class java {
-    java_archive : "jdk-8u01-linux-x64.tar.gz",
-    java_home : "/usr/lib/jvm/jdk1.8.0_01/",
-    java_folder : "jdk1.8.0_01")  
+class { "java":
+    java_archive => "jdk-8u01-linux-x64.tar.gz",
+    java_home => "/usr/lib/jvm/jdk1.8.0_01/",
+    java_folder => "jdk1.8.0_01")  
 }
 {% endcodeblock %}
 
