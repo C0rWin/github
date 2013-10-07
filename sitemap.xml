@@ -18,19 +18,23 @@
         <loc>
             http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/
         </loc>
-        <lastmod>2013-10-08T00:01:12+03:00</lastmod>
+        <lastmod>2013-10-08T00:02:54+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/blog/2013/09/30/israel-global-day-of-code-retreat/</loc>
         <lastmod>2013-09-30T01:01:21+03:00</lastmod>
     </url>
     <url>
+        <loc>http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud/</loc>
+        <lastmod>2013-10-08T00:49:36+03:00</lastmod>
+    </url>
+    <url>
         <loc>http://pensieve.info/blog/archives/</loc>
-        <lastmod>2013-10-08T00:01:12+03:00</lastmod>
+        <lastmod>2013-10-08T00:49:36+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/</loc>
-        <lastmod>2013-10-08T00:01:12+03:00</lastmod>
+        <lastmod>2013-10-08T00:49:36+03:00</lastmod>
     </url>
     <url>
         <loc>http://pensieve.info/robots.txt</loc>

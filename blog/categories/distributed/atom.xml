@@ -4,7 +4,7 @@
   <title><![CDATA[Category: distributed | Short notes]]></title>
   <link href="http://pensieve.info/blog/categories/distributed/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-10-08T00:01:53+03:00</updated>
+  <updated>2013-10-08T00:51:20+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -12,6 +12,99 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Running Matlab code on Amazon cloud.]]></title>
+    <link href="http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud/"/>
+    <updated>2013-10-08T00:04:00+03:00</updated>
+    <id>http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud</id>
+    <content type="html"><![CDATA[<p>Recently I&rsquo;ve bumped into the need to have Matlab code running on Amazon cloud infrastructure. Moreover my Matlab application has to communicate with rest of the world, therefore I have  had to find some third party communication labrary for Matlab which will do the work. It&rsquo;s long story why do I need this, but googling around I&rsquo;ve found series of the blog entries, which explains in details how to do it, basically it also explains the reason why do I need to do it.</p>
+
+<ol>
+<li><a href="http://noisyaccumulation.blogspot.co.il/2010/09/using-amazon-ec2-to-speed-up-matlab.html">Using Amazon EC2 to speed up matlab optimisation</a></li>
+<li><a href="http://noisyaccumulation.blogspot.co.il/2010/12/using-amazon-ec2-to-speed-up-matlab.html">Writing a socket interface in Matlab to send / receive the commands</a></li>
+<li><a href="http://noisyaccumulation.blogspot.com/2010/12/using-amazon-ec2-to-speed-up-matlab_22.html">Setting up an Ubuntu EC2 instance to run the compiled Matlab code</a></li>
+<li><a href="http://noisyaccumulation.blogspot.com/2010/12/using-amazon-ec2-to-speed-up-matlab_9326.html">Writing matlab software to communicate with the server.</a></li>
+</ol>
+
+
+<p>As you may probably guess were this strightforward procees I&rsquo;ve never been spending my time to write this blog entry. Since I&rsquo;ve had to solve a couple of puzzles and tackled with quite a few trick I&rsquo;d like to memorize my expirience here, hopefully it will save time to more people later.</p>
+
+<!-- more -->
+
+
+<h3>1. First step, download msocket toolbox(set of wrappers for socket communication) .</h3>
+
+<p>Msocket library located at <a href="http://code.google.com/p/msocket/">google code repository</a> and looks like nobody has touched for year or two and there were several changes in Matlab API since then. Therefore you will have to patch a bit code in this library to make it compile.</p>
+
+<h5>1.1 Add include to matrix module (#include &lt;matrix.h>) for msrecv.cpp and msrecvraw.c.</h5>
+
+<h5>1.2 Replace each occurence of <strong>&ldquo;mxCreateScalarDouble&rdquo;</strong> with <strong>&ldquo;mxCreateDoubleScalar&rdquo;</strong>.</h5>
+
+<h5>1.3 Open msocket with Matlab and execute compileit, this will compile source code for you.</h5>
+
+<h5>1.4 Add msocket library to Matlab path.</h5>
+
+<p>Now you ready to implement your client/server application while leveraging mathematics capabilities of Matlab.</p>
+
+<h3>2. Implement your client/server application.</h3>
+
+<p>I will skip this part, mainly because it&rsquo;s greatly covered in blog post series I&rsquo;ve mentioed above and because due to licensing regulation I cannot past this code here in the blog.</p>
+
+<h3>3. Instantiate EC2 on Amazon.</h3>
+
+<p>Just pick instance which suites your goals and run them. I&rsquo;ve used micro instance with Ubuntu 12.04 LTE as OS.</p>
+
+<h3>4. Update packages.</h3>
+
+<p>SSH into your newly created instances and run form terminal an update:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get update &amp;&amp; sudo apt-get upgrade -y</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Once update install several dependencies we will use later.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install g++ libxmu6 libxt6 -y</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>5. Download MCR.</h3>
+
+<p>Download MCR from Matlab site <a href="http://www.mathworks.com/products/compiler/mcr/">here</a>. Once download is finished upload it on your EC2 instances.</p>
+
+<h3>6.Install MCR at EC2.</h3>
+
+<p>On each instance run in terminal:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd MCR_R2013a_glnxa64_installer/
+</span><span class='line'>./install -console -mode silent  -agreeToLicense yes</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>7. Compile your Matlab application.</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Matlab </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fortran'><span class='line'><span class="nv">mcc</span> <span class="o">-</span><span class="nv">m</span> <span class="nv">NameOfYourApplication</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>8. Upload compiled on EC2 instances.</h3>
+
+<p>After compilation has finished you need to upload compiled code onto the cloud instances. You need to upload files:
+* NameOfYourApplication
+* run_NameOfYourApplication.sh</p>
+
+<h3>9. Run your app.</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./run_NameOfYourApplication.sh /usr/local/MATLAB/MATLAB_Compiler_Runtime/v81/</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>10.Enjoy!</h3>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Setup hadoop cluster]]></title>

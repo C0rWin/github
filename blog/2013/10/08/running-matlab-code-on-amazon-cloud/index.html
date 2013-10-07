@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Israel Global Day of Code Retreat 2013. - Short notes</title>
+  <title>Running Matlab code on Amazon cloud. - Short notes</title>
   <meta name="author" content="C0rWin">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://pensieve.info/blog/2013/09/30/israel-global-day-of-code-retreat">
+  <link rel="canonical" href="http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -108,7 +108,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">Israel Global Day of Code Retreat 2013.</h1>
+      <h1 class="entry-title">Running Matlab Code on Amazon Cloud.</h1>
     
     
       <p class="meta">
@@ -124,7 +124,7 @@
   
 
 
-<time datetime="2013-09-30T00:28:00+03:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+<time datetime="2013-10-08T00:04:00+03:00" pubdate data-updated="true">Oct 8<span>th</span>, 2013</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -133,15 +133,96 @@
   </header>
 
 
-<div class="entry-content"><p>During day-to-day, developers facing with deadlines, different project commitments, bug fixing, maitenance and support. There is always not enough time for code improvements and refactoring. I wish I&rsquo;ll have some free day I could easily practice and improve my development skills without having all this duties on head.</p>
+<div class="entry-content"><p>Recently I&rsquo;ve bumped into the need to have Matlab code running on Amazon cloud infrastructure. Moreover my Matlab application has to communicate with rest of the world, therefore I have  had to find some third party communication labrary for Matlab which will do the work. It&rsquo;s long story why do I need this, but googling around I&rsquo;ve found series of the blog entries, which explains in details how to do it, basically it also explains the reason why do I need to do it.</p>
 
-<p>So here it comes again:</p>
+<ol>
+<li><a href="http://noisyaccumulation.blogspot.co.il/2010/09/using-amazon-ec2-to-speed-up-matlab.html">Using Amazon EC2 to speed up matlab optimisation</a></li>
+<li><a href="http://noisyaccumulation.blogspot.co.il/2010/12/using-amazon-ec2-to-speed-up-matlab.html">Writing a socket interface in Matlab to send / receive the commands</a></li>
+<li><a href="http://noisyaccumulation.blogspot.com/2010/12/using-amazon-ec2-to-speed-up-matlab_22.html">Setting up an Ubuntu EC2 instance to run the compiled Matlab code</a></li>
+<li><a href="http://noisyaccumulation.blogspot.com/2010/12/using-amazon-ec2-to-speed-up-matlab_9326.html">Writing matlab software to communicate with the server.</a></li>
+</ol>
 
-<blockquote><p>On 14th of December there will be <a href="http://coderetreat.org/">Global Day of Code Retreat</a> event, which this year is hosted by <a href="http://coderetreat.org/events/event/listByLocation?location=eBay+Israel+Innovation+Center%27s+Offices">Ebay Israel Innovation Center</a>. You can find more on <a href="http://coderetreat.org/about">about</a> page and take a look on following video:</p></blockquote>
 
-<p> <div class="embed-video-container"><iframe src="http://player.vimeo.com/video/18955165 "></iframe></div></p>
+<p>As you may probably guess were this strightforward procees I&rsquo;ve never been spending my time to write this blog entry. Since I&rsquo;ve had to solve a couple of puzzles and tackled with quite a few trick I&rsquo;d like to memorize my expirience here, hopefully it will save time to more people later.</p>
 
-<p><strong>Do not miss, highly recommended.</strong></p>
+<!-- more -->
+
+
+<h3>1. First step, download msocket toolbox(set of wrappers for socket communication) .</h3>
+
+<p>Msocket library located at <a href="http://code.google.com/p/msocket/">google code repository</a> and looks like nobody has touched for year or two and there were several changes in Matlab API since then. Therefore you will have to patch a bit code in this library to make it compile.</p>
+
+<h5>1.1 Add include to matrix module (#include &lt;matrix.h>) for msrecv.cpp and msrecvraw.c.</h5>
+
+<h5>1.2 Replace each occurence of <strong>&ldquo;mxCreateScalarDouble&rdquo;</strong> with <strong>&ldquo;mxCreateDoubleScalar&rdquo;</strong>.</h5>
+
+<h5>1.3 Open msocket with Matlab and execute compileit, this will compile source code for you.</h5>
+
+<h5>1.4 Add msocket library to Matlab path.</h5>
+
+<p>Now you ready to implement your client/server application while leveraging mathematics capabilities of Matlab.</p>
+
+<h3>2. Implement your client/server application.</h3>
+
+<p>I will skip this part, mainly because it&rsquo;s greatly covered in blog post series I&rsquo;ve mentioed above and because due to licensing regulation I cannot past this code here in the blog.</p>
+
+<h3>3. Instantiate EC2 on Amazon.</h3>
+
+<p>Just pick instance which suites your goals and run them. I&rsquo;ve used micro instance with Ubuntu 12.04 LTE as OS.</p>
+
+<h3>4. Update packages.</h3>
+
+<p>SSH into your newly created instances and run form terminal an update:</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get update && sudo apt-get upgrade -y</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Once update install several dependencies we will use later.</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install g++ libxmu6 libxt6 -y</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>5. Download MCR.</h3>
+
+<p>Download MCR from Matlab site <a href="http://www.mathworks.com/products/compiler/mcr/">here</a>. Once download is finished upload it on your EC2 instances.</p>
+
+<h3>6.Install MCR at EC2.</h3>
+
+<p>On each instance run in terminal:</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd MCR_R2013a_glnxa64_installer/
+</span><span class='line'>./install -console -mode silent  -agreeToLicense yes</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>7. Compile your Matlab application.</h3>
+
+<figure class='code'><figcaption><span>Matlab </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fortran'><span class='line'><span class="nv">mcc</span> <span class="o">-</span><span class="nv">m</span> <span class="nv">NameOfYourApplication</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>8. Upload compiled on EC2 instances.</h3>
+
+<p>After compilation has finished you need to upload compiled code onto the cloud instances. You need to upload files:
+* NameOfYourApplication
+* run_NameOfYourApplication.sh</p>
+
+<h3>9. Run your app.</h3>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./run_NameOfYourApplication.sh /usr/local/MATLAB/MATLAB_Compiler_Runtime/v81/</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>10.Enjoy!</h3>
 </div>
 
 
@@ -164,12 +245,12 @@
   
 
 
-<time datetime="2013-09-30T00:28:00+03:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+<time datetime="2013-10-08T00:04:00+03:00" pubdate data-updated="true">Oct 8<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/gdcr-2013/'>GDCR_2013</a>, <a class='category' href='/blog/categories/event/'>event</a>
+    <a class='category' href='/blog/categories/amazon/'>amazon</a>, <a class='category' href='/blog/categories/distributed/'>distributed</a>, <a class='category' href='/blog/categories/ec2/'>ec2</a>, <a class='category' href='/blog/categories/matab/'>matab</a>
   
 </span>
 
@@ -178,7 +259,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pensieve.info/blog/2013/09/30/israel-global-day-of-code-retreat/" data-via="C0rWin" data-counturl="http://pensieve.info/blog/2013/09/30/israel-global-day-of-code-retreat/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud/" data-via="C0rWin" data-counturl="http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud/" >Tweet</a>
   
   
   
@@ -195,14 +276,10 @@
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/" title="Previous Post:
-        Putting all together setup, Hadoop cluster on VM with Puppet.">&laquo; Putting all together setup, Hadoop cluster on VM with Puppet.</a></li>
+        href="/blog/2013/09/30/israel-global-day-of-code-retreat/" title="Previous Post:
+        Israel Global Day of Code Retreat 2013.">&laquo; Israel Global Day of Code Retreat 2013.</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
-      
-      <li class="next"><a class="basic-alignment right" href="/blog/2013/10/08/running-matlab-code-on-amazon-cloud/"
-        title="Next Post: Running Matlab code on Amazon cloud.">Running Matlab code on Amazon cloud.
-        &raquo;</a></li>
       
     </ul>
   </footer>
@@ -299,8 +376,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://pensieve.info/blog/2013/09/30/israel-global-day-of-code-retreat/';
-        var disqus_url = 'http://pensieve.info/blog/2013/09/30/israel-global-day-of-code-retreat/';
+        var disqus_identifier = 'http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud/';
+        var disqus_url = 'http://pensieve.info/blog/2013/10/08/running-matlab-code-on-amazon-cloud/';
         var disqus_script = 'embed.js';
       
     (function () {
