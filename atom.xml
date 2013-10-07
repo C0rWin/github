@@ -4,7 +4,7 @@
   <title><![CDATA[Short notes]]></title>
   <link href="http://pensieve.info/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-10-03T16:08:21+03:00</updated>
+  <updated>2013-10-08T00:01:53+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -27,6 +27,486 @@
 <p> <div class="embed-video-container"><iframe src="http://player.vimeo.com/video/18955165 "></iframe></div></p>
 
 <p><strong>Do not miss, highly recommended.</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Putting all together setup, Hadoop cluster on VM with Puppet.]]></title>
+    <link href="http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/"/>
+    <updated>2013-09-30T00:14:00+03:00</updated>
+    <id>http://pensieve.info/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet</id>
+    <content type="html"><![CDATA[<p>In my two previous blog post I&rsquo;ve explained:</p>
+
+<ol>
+<li><a href="blog/2013/09/21/setup-hadoop-cluster/">Setup Hadoop cluster</a> &ndash; manual configuration on virtual machines which needed to setup Hadoop cluster.</li>
+<li><a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">Install Java on VM using vagrant and puppet</a> &ndash; I&rsquo;ve started to explain how to leverage vagrant and puppet in order to have Java installed in virtual machine.</li>
+</ol>
+
+
+<p>Now in this post I&rsquo;ll try to explain how-to setup hadoop cluster on virtual environment using vagrant and puppet scripts, so all actions in my first post could be easily automated.</p>
+
+<p> <!-- more --></p>
+
+<p> I&rsquo;m going to use my first two posts as a reference and assume you have downloaded all files needed, moreover you already have puppet module script for java install and configuration.</p>
+
+<p>Start as usual:</p>
+
+<h3>1. Create module folders:</h3>
+
+<figure class='code'><figcaption><span>Terminal Widow </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p modules/hadoop/{files,manifests,templates}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2. Copy hadoop files into module folder:</h3>
+
+<p>As I said I&rsquo;m going to use files from previous <a href="blog/2013/09/21/setup-hadoop-cluster/">post</a></p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp hadoop-1.2.1.tar.gz modules/hadoop/files/</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3. Write implementation of hadoop module for puppet.</h3>
+
+<p>Following script will download, unpack and setup hadoop on desired amount of virtual machines.</p>
+
+<figure class='code'><figcaption><span>init.pp </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="n">hadoop</span><span class="p">(</span> <span class="vg">$masterNode</span><span class="p">,</span> <span class="vg">$slaveNodes</span><span class="p">,</span> <span class="vg">$distrFile</span><span class="p">,</span> <span class="vg">$hadoopHome</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="no">Exec</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">path</span> <span class="o">=&gt;</span> <span class="o">[</span> <span class="s2">&quot;/usr/bin&quot;</span><span class="p">,</span> <span class="s2">&quot;/bin&quot;</span><span class="p">,</span> <span class="s2">&quot;/usr/sbin&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/tmp/${distrFile}.tar.gz&quot;</span> <span class="p">:</span>
+</span><span class='line'>        <span class="n">source</span> <span class="o">=&gt;</span> <span class="s2">&quot;puppet:///modules/hadoop/${distrFile}.tar.gz&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span>  <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">mode</span>  <span class="o">=&gt;</span> <span class="mi">755</span><span class="p">,</span>
+</span><span class='line'>        <span class="k">ensure</span> <span class="o">=&gt;</span> <span class="n">present</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">exec</span> <span class="p">{</span> <span class="s2">&quot;extract distr&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">cwd</span> <span class="o">=&gt;</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">command</span> <span class="o">=&gt;</span> <span class="s2">&quot;tar xf ${distrFile}.tar.gz&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">creates</span> <span class="o">=&gt;</span> <span class="s2">&quot;${hadoopHome}&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">user</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">File</span><span class="o">[</span><span class="s2">&quot;/tmp/${distrFile}.tar.gz&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">exec</span> <span class="p">{</span> <span class="s2">&quot;move distr&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">cwd</span> <span class="o">=&gt;</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">command</span> <span class="o">=&gt;</span> <span class="s2">&quot;mv ${distrFile} ${hadoopHome}&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">creates</span> <span class="o">=&gt;</span> <span class="s2">&quot;${hadoopHome}&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">user</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[</span><span class="s2">&quot;extract distr&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/etc/profile.d/hadoop.sh&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">content</span> <span class="o">=&gt;</span> <span class="s2">&quot;export HADOOP_PREFIX=</span><span class="se">\&quot;</span><span class="s2">${hadoopHome}</span><span class="se">\&quot;</span><span class="s2"></span>
+</span><span class='line'><span class="s2">        export PATH=</span><span class="se">\&quot;</span><span class="s2">\$PATH:\$HADOOP_PREFIX/bin</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;${hadoopHome}/conf/slaves&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">content</span> <span class="o">=&gt;</span> <span class="n">template</span><span class="p">(</span> <span class="s2">&quot;hadoop/slaves.erb&quot;</span><span class="p">),</span>
+</span><span class='line'>        <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">644</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">group</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[</span> <span class="s2">&quot;move distr&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;${hadoopHome}/conf/masters&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">content</span> <span class="o">=&gt;</span> <span class="n">template</span><span class="p">(</span> <span class="s2">&quot;hadoop/masters.erb&quot;</span><span class="p">),</span>
+</span><span class='line'>        <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">644</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">group</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[</span> <span class="s2">&quot;move distr&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;${hadoopHome}/conf/core-site.xml&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">content</span> <span class="o">=&gt;</span> <span class="n">template</span><span class="p">(</span> <span class="s2">&quot;hadoop/core-site.erb&quot;</span><span class="p">),</span>
+</span><span class='line'>        <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">644</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">group</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[</span> <span class="s2">&quot;move distr&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;${hadoopHome}/conf/hdfs-site.xml&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">content</span> <span class="o">=&gt;</span> <span class="n">template</span><span class="p">(</span> <span class="s2">&quot;hadoop/hdfs-site.erb&quot;</span><span class="p">),</span>
+</span><span class='line'>        <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">644</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">group</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[</span> <span class="s2">&quot;move distr&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;${hadoopHome}/conf/mapred-site.xml&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">content</span> <span class="o">=&gt;</span> <span class="n">template</span><span class="p">(</span> <span class="s2">&quot;hadoop/mapred-site.erb&quot;</span><span class="p">),</span>
+</span><span class='line'>        <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">644</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">group</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">Exec</span><span class="o">[</span> <span class="s2">&quot;move distr&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4. Write puppet templates for configuration files:</h3>
+
+<p>You probably paid attention that in order to setup hadoop configuration files I&rsquo;ve used puppet templates function (you can read more <a href="http://docs.puppetlabs.com/guides/templating.html">here</a>). Therefore now we need to provide three configuration files in order to complete that part.</p>
+
+<figure class='code'><figcaption><span>masters </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% @masterNode </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>slaves </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% @slaveNodes.each </span><span class="k">do</span> <span class="o">|</span><span class="n">node</span><span class="o">|</span> <span class="o">-</span><span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% node %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">-%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>core-site.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+</span><span class='line'><span class="cp">&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;property&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;name&gt;</span>fs.default.name<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;value&gt;</span><span class="err">&lt;</span>%= @masterNode %&gt;:9000<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;description&gt;</span>The name of the default file system. A URI whose scheme and authority determine the FileSystem implementation.<span class="nt">&lt;/description&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/property&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/configuration&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>hdfs-site.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+</span><span class='line'><span class="cp">&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;property&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;name&gt;</span>dfs.replication<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;value&gt;</span>1<span class="nt">&lt;/value&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;description&gt;</span>The actual number of replications can be specified when the file is created.<span class="nt">&lt;/description&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/property&gt;</span>
+</span><span class='line'><span class="nt">&lt;/configuration&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>mapred-site.erb </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="p">?</span><span class="n">xml</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="sc">?&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="p">?</span><span class="n">xml</span><span class="o">-</span><span class="n">stylesheet</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text/xsl&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;configuration.xsl&quot;</span><span class="sc">?&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">configuration</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">property</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nb">name</span><span class="o">&gt;</span><span class="n">mapred</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">tracker</span><span class="o">&lt;</span><span class="sr">/name&gt;</span>
+</span><span class='line'><span class="sr">        &lt;value&gt;&lt;% @masterNode %&gt;:9001&lt;/</span><span class="n">value</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="no">The</span> <span class="n">host</span> <span class="ow">and</span> <span class="n">port</span> <span class="n">that</span> <span class="n">the</span> <span class="no">MapReduce</span> <span class="n">job</span> <span class="n">tracker</span> <span class="n">runs</span> <span class="n">at</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/description&gt;</span>
+</span><span class='line'><span class="sr">    &lt;/</span><span class="n">property</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/configuration&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Where:</p>
+
+<ul>
+<li><strong>$masterNode</strong> &ndash; IP address of hadoop master node.</li>
+<li><strong>$slaveNodes</strong>  &ndash;  list of IP addresses for hadoop slave nodes.</li>
+<li><strong>$distrFile</strong> &ndash; hadoop distribution file name.</li>
+<li><strong>$hadoopHome</strong> &ndash; desired hadoop home folder.</li>
+</ul>
+
+
+<h3>5. Next step is to write Vagrant file.</h3>
+
+<figure class='code'><figcaption><span>Vagrant </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">Vagrant</span><span class="p">:</span><span class="ss">:Config</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="ss">:hadoop_master</span> <span class="k">do</span> <span class="o">|</span><span class="n">hadoop_config</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;ubuntu&quot;</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:hostonly</span><span class="p">,</span> <span class="s2">&quot;192.168.32.1&quot;</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">host_name</span> <span class="o">=</span> <span class="s2">&quot;master&quot;</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span> <span class="s2">&quot;modifyvm&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--memory&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:puppet</span><span class="p">,</span> <span class="ss">:facter</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="s2">&quot;fqdn&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;master&quot;</span><span class="p">}</span> <span class="k">do</span> <span class="o">|</span><span class="n">puppet</span><span class="o">|</span>
+</span><span class='line'>                <span class="n">puppet</span><span class="o">.</span><span class="n">module_path</span> <span class="o">=</span> <span class="s2">&quot;modules&quot;</span>
+</span><span class='line'>                <span class="n">puppet</span><span class="o">.</span><span class="n">manifests_path</span> <span class="o">=</span> <span class="s2">&quot;manifests&quot;</span>
+</span><span class='line'>                <span class="n">puppet</span><span class="o">.</span><span class="n">manifest_file</span>  <span class="o">=</span> <span class="s2">&quot;hadoop.pp&quot;</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="ss">:hadoop_slave</span> <span class="k">do</span> <span class="o">|</span><span class="n">hadoop_config</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;ubuntu&quot;</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:hostonly</span><span class="p">,</span> <span class="s2">&quot;192.168.32.2&quot;</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">host_name</span> <span class="o">=</span> <span class="s2">&quot;slave&quot;</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span> <span class="s2">&quot;modifyvm&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--memory&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="n">hadoop_config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:puppet</span><span class="p">,</span> <span class="ss">:facter</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="s2">&quot;fqdn&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;slave&quot;</span><span class="p">}</span> <span class="k">do</span> <span class="o">|</span><span class="n">puppet</span><span class="o">|</span>
+</span><span class='line'>                <span class="n">puppet</span><span class="o">.</span><span class="n">module_path</span> <span class="o">=</span> <span class="s2">&quot;modules&quot;</span>
+</span><span class='line'>                <span class="n">puppet</span><span class="o">.</span><span class="n">manifests_path</span> <span class="o">=</span> <span class="s2">&quot;manifests&quot;</span>
+</span><span class='line'>                <span class="n">puppet</span><span class="o">.</span><span class="n">manifest_file</span>  <span class="o">=</span> <span class="s2">&quot;hadoop.pp&quot;</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>6. Now we need to write some code to combine java installation process with hadoop setup.</h3>
+
+<p>Following script will initialize java defaults and hadoop installation.</p>
+
+<figure class='code'><figcaption><span>hadoop.pp </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="p">{</span> <span class="s2">&quot;hadoop&quot;</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">masterNode</span> <span class="o">=&gt;</span> <span class="s2">&quot;192.168.32.1&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">slaveNodes</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;192.168.32.1&quot;</span><span class="p">,</span> <span class="s2">&quot;192.168.32.2&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">distrFile</span>  <span class="o">=&gt;</span> <span class="s2">&quot;hadoop-1.2.1&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">hadoopHome</span> <span class="o">=&gt;</span> <span class="s2">&quot;/home/vagrant/hadoop&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kp">include</span> <span class="n">java</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>7. Run virtual machines.</h3>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vagrant up hadoop_{master,slave}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now if we proceed to the last step in <a href="blog/2013/09/21/setup-hadoop-cluster/">hadoop</a> post and will try to run command on master node:</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo ./hadoop namenode -format
+</span><span class='line'>sudo ./start-all.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We will notice that we have forgot to configure and publish ssh keys between nodes, hence cluster is not able to properly startup. Therefore we need to continue a bit more.</p>
+
+<h3>8. Setup ssh keys.</h3>
+
+<p>Run in terminal:</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-keygen -t rsa</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and provide key path up to your files module folder (&ldquo;modules/hadoop/files/id_rsa&rdquo; for example). Enter your passphrase, now open new generated id_rsa.pub and copy into clipboard newly generated public key.
+Now we need to add following lines into our module init.pp file:</p>
+
+<figure class='code'><figcaption><span>init.pp </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/home/vagrant/.ssh/id_rsa&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">source</span> <span class="o">=&gt;</span> <span class="s2">&quot;puppet:///modules/hadoop/id_rsa&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">600</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">group</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">file</span> <span class="p">{</span> <span class="s2">&quot;/home/vagrant/.ssh/id_rsa.pub&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">source</span> <span class="o">=&gt;</span> <span class="s2">&quot;puppet:///modules/hadoop/id_rsa.pub&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">mode</span> <span class="o">=&gt;</span> <span class="mi">600</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">group</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">ssh_authorized_key</span> <span class="p">{</span> <span class="s2">&quot;ssh_key&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">ensure</span> <span class="o">=&gt;</span> <span class="s2">&quot;present&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">key</span> <span class="o">=&gt;</span> <span class="s2">&quot;past here content from your clipboard (public key value from id_rsa.pub file)&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">type</span> <span class="o">=&gt;</span> <span class="s2">&quot;ssh-rsa&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">user</span> <span class="o">=&gt;</span> <span class="n">vagrant</span><span class="p">,</span>
+</span><span class='line'>        <span class="nb">require</span> <span class="o">=&gt;</span> <span class="no">File</span><span class="o">[</span><span class="s2">&quot;/home/vagrant/.ssh/id_rsa.pub&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>9. Enjoy.</h3>
+
+<p>Now you can reload virtual machines</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vagrant reload hadoop_{master,slave}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then loggin into master node</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vagrant ssh hadoop_master</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and finally start cluster</p>
+
+<figure class='code'><figcaption><span>Terminal Window </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo ./hadoop namenode -format
+</span><span class='line'>sudo ./start-all.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can find sources on my <a href="https://github.com/C0rWin/hadoop-puppet">github</a>.</p>
 ]]></content>
   </entry>
   
