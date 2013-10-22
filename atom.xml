@@ -4,7 +4,7 @@
   <title><![CDATA[Short notes]]></title>
   <link href="http://pensieve.info/atom.xml" rel="self"/>
   <link href="http://pensieve.info/"/>
-  <updated>2013-10-08T00:51:20+03:00</updated>
+  <updated>2013-10-22T14:23:58+03:00</updated>
   <id>http://pensieve.info/</id>
   <author>
     <name><![CDATA[C0rWin]]></name>
@@ -12,6 +12,376 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Java Collections, Guava, reducing boilerplate code]]></title>
+    <link href="http://pensieve.info/blog/2013/10/16/java-collections/"/>
+    <updated>2013-10-16T15:11:00+03:00</updated>
+    <id>http://pensieve.info/blog/2013/10/16/java-collections</id>
+    <content type="html"><![CDATA[<p>Guava is a framework developed by Google to bridge the gap in Java SDK Collections API&rsquo;s. It introduces quite a lot of different techniques and development patterns which one was expecting to find in regular Collections API, but apparently wasn&rsquo;t able. I will try to show a few different techniques which helps me to reduce boilerplate code in my projects.</p>
+
+<!-- more -->
+
+
+<h3>1. Getting element at position i from Set.</h3>
+
+<p>How often you&rsquo;ve seen something similar to following code?</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">names</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashSet</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;(</span> <span class="o">);</span>
+</span><span class='line'><span class="n">names</span><span class="o">.</span><span class="na">add</span><span class="o">(</span> <span class="s">&quot;John D.&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="err">\\</span> <span class="o">...</span>
+</span><span class='line'><span class="err">\\</span> <span class="n">and</span> <span class="n">then</span> <span class="n">you</span> <span class="n">realize</span> <span class="n">you</span> <span class="n">need</span> <span class="n">to</span> <span class="n">pull</span> <span class="n">first</span> <span class="n">item</span> <span class="n">from</span> <span class="n">your</span> <span class="n">collection</span>
+</span><span class='line'><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">it</span> <span class="o">=</span> <span class="n">names</span><span class="o">.</span><span class="na">iterator</span><span class="o">(</span> <span class="o">);</span>
+</span><span class='line'><span class="n">String</span> <span class="n">firstName</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">(</span> <span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> Or it might be even worse:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">names</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashSet</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;(</span> <span class="o">);</span>
+</span><span class='line'> <span class="n">names</span><span class="o">.</span><span class="na">add</span><span class="o">(</span> <span class="s">&quot;John D.&quot;</span><span class="o">);</span>
+</span><span class='line'> <span class="c1">// adding more names skipped.</span>
+</span><span class='line'> <span class="c1">// and now we need 5th element from the set.</span>
+</span><span class='line'> <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">it</span> <span class="o">=</span> <span class="n">names</span><span class="o">.</span><span class="na">iterator</span><span class="o">(</span> <span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">for</span><span class="o">(</span> <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">it</span><span class="o">.</span><span class="na">hasNext</span><span class="o">(</span> <span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="o">;</span> <span class="n">idx</span><span class="o">++,</span><span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">(</span> <span class="o">)</span> <span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// Iterate over</span>
+</span><span class='line'>
+</span><span class='line'> <span class="n">String</span> <span class="n">fithElement</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'> <span class="k">if</span> <span class="o">(</span> <span class="n">it</span><span class="o">.</span><span class="na">hasNext</span><span class="o">(</span> <span class="o">))</span> <span class="o">{</span> <span class="c1">// We stoped because idx reached 4, hence skipped only 4 items.</span>
+</span><span class='line'>  <span class="n">fithElement</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">hext</span><span class="o">(</span> <span class="o">);</span>
+</span><span class='line'> <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">fithElement</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> To avoid writing again and again these lines of code Guava, introduces FluentIterable interface and util class Iterables which enables us to re-write lines from above as follows:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="c1">// Same initialization as previous</span>
+</span><span class='line'> <span class="n">String</span> <span class="n">firstElement</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">get</span><span class="o">(</span> <span class="n">names</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'> <span class="c1">// And</span>
+</span><span class='line'> <span class="n">String</span> <span class="n">fithElement</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">get</span><span class="o">(</span> <span class="n">names</span><span class="o">,</span> <span class="mi">4</span><span class="o">);</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> Or with edge cases of first or last element it might looks like:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">String</span> <span class="n">firstElement</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">getFirst</span><span class="o">(</span> <span class="n">names</span><span class="o">,</span> <span class="s">&quot;defaultValue&quot;</span><span class="o">);</span> <span class="c1">// return first element from set of names</span>
+</span><span class='line'> <span class="n">String</span> <span class="n">lastElement</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">getLast</span><span class="o">(</span> <span class="n">names</span><span class="o">);</span> <span class="c1">// return the last element</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2. Finding element in collection of complex POJO.</h3>
+
+<p>For now suppose we have a famous Person pojo, which looks like:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">class</span> <span class="nc">Person</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">private</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">private</span> <span class="n">String</span> <span class="n">email</span><span class="o">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">public</span> <span class="nf">Person</span><span class="o">(</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">email</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">firstName</span> <span class="o">=</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">lastName</span> <span class="o">=</span> <span class="n">lastName</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">email</span> <span class="o">=</span> <span class="n">email</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">public</span> <span class="n">String</span> <span class="nf">getFirstName</span> <span class="o">(</span> <span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">public</span> <span class="n">String</span> <span class="nf">getLastName</span><span class="o">(</span> <span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">lastName</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">public</span> <span class="n">String</span> <span class="nf">getEmail</span><span class="o">(</span> <span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">email</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">// omitting setters since not relevant for current demo/example.</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we have a collection of persons say:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">people</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;(</span> <span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">people</span><span class="o">.</span><span class="na">add</span><span class="o">(</span> <span class="k">new</span> <span class="n">Person</span><span class="o">(</span> <span class="s">&quot;John&quot;</span><span class="o">,</span> <span class="s">&quot;Doe&quot;</span><span class="o">,</span> <span class="s">&quot;john@doe.com&quot;</span><span class="o">));</span>
+</span><span class='line'><span class="n">people</span><span class="o">.</span><span class="na">add</span><span class="o">(</span> <span class="k">new</span> <span class="n">Person</span><span class="o">(</span> <span class="s">&quot;William&quot;</span><span class="o">,</span> <span class="s">&quot;McLoren&quot;</span><span class="o">,</span> <span class="s">&quot;william@mcloren.com&quot;</span><span class="o">));</span>
+</span><span class='line'><span class="c1">//...</span>
+</span><span class='line'><span class="n">people</span><span class="o">.</span><span class="na">add</span><span class="o">(</span>  <span class="k">new</span> <span class="n">Person</span><span class="o">(</span> <span class="s">&quot;Bruce&quot;</span><span class="o">,</span> <span class="s">&quot;Jonson&quot;</span><span class="o">,</span> <span class="s">&quot;bruce@jonson.com&quot;</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we need to lookup from this collection all persons with name &ldquo;John&rdquo;. With plain Java Collections SDK it might look like:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Person</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'><span class="k">for</span> <span class="o">(</span> <span class="n">Person</span> <span class="nl">each:</span> <span class="n">people</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span> <span class="s">&quot;John&quot;</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span> <span class="n">each</span><span class="o">.</span><span class="na">getFirstName</span><span class="o">(</span> <span class="o">)))</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">result</span> <span class="o">=</span> <span class="n">each</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>  
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Guava Iterables utils class introduce find method which get two parameters an intance of Iterable interface and Predicate, method iterates over all elements and returns back on those which muches the predicate (e.g. predicate return true for them). Now it became:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">class</span> <span class="nc">FirstNamePredicate</span> <span class="kd">implements</span> <span class="n">Predicate</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="kd">public</span> <span class="nf">FirstNamePredicate</span><span class="o">(</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">firstName</span> <span class="o">=</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>      
+</span><span class='line'>  <span class="nd">@Overide</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">apply</span><span class="o">(</span> <span class="n">Person</span> <span class="n">person</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">firstName</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span> <span class="n">person</span><span class="o">.</span><span class="na">getFirstName</span><span class="o">(</span> <span class="o">));</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// and now we can use it to seach element we would like from given collection.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Iterable</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">find</span><span class="o">(</span> <span class="n">people</span><span class="o">,</span> <span class="k">new</span> <span class="n">FirstNamePredicate</span><span class="o">(</span> <span class="s">&quot;John&quot;</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Basically one line will do the work, while previously we have had to use for each loop. Now one could possibly argue and say &ldquo;Wait a moment! Instead of simple for each you have written done a whole class!&rdquo;. And my answer for that yes of course I did! Now I do able to reuse my code, now I then I&rsquo;ve lookup logic decoupled I can easily test it. Moreover this is just one simple example, but as you can imagine it could be much more complicated then this specific one.</p>
+
+<p>Now, we have to pay attention on the fact that find method will result in run-time exception in case element is not found which will lead to following code:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">Iterable</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">find</span><span class="o">(</span> <span class="n">people</span><span class="o">,</span> <span class="k">new</span> <span class="n">FIrstNamePredicate</span><span class="o">(</span> <span class="s">&quot;John&quot;</span><span class="o">));</span>
+</span><span class='line'><span class="k">catch</span> <span class="o">(</span> <span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// And here need to take care of cases where element is not found.</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A much nicer way will be to use recently introduced new method of <strong>Iterables</strong> which is <strong>tryFind</strong>, as a result it will return instance of <strong>Optional</strong> and in case there is no such element in collection instead of having to handle exceptional case now you can simply :</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">tryFind</span><span class="o">(</span> <span class="n">people</span><span class="o">,</span> <span class="k">new</span> <span class="n">FIrstNamePredicate</span><span class="o">(</span> <span class="s">&quot;John&quot;</span><span class="o">));</span>
+</span><span class='line'><span class="c1">// and now you can check whenever value of object is presented</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span> <span class="n">result</span><span class="o">.</span><span class="na">isPresent</span><span class="o">(</span> <span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">handleResult</span><span class="o">(</span> <span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span> <span class="o">));</span>
+</span><span class='line'><span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">handleNoResult</span><span class="o">(</span> <span class="n">result</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or it could be even:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Iterables</span><span class="o">.</span><span class="na">tryFind</span><span class="o">(</span> <span class="n">people</span><span class="o">,</span> <span class="k">new</span> <span class="n">FIrstNamePredicate</span><span class="o">(</span> <span class="s">&quot;John&quot;</span><span class="o">)).</span><span class="na">or</span><span class="o">(</span> <span class="k">new</span> <span class="n">Person</span><span class="o">(</span> <span class="s">&quot;UFO&quot;</span><span class="o">,</span><span class="s">&quot;Alien&quot;</span><span class="o">));</span>
+</span><span class='line'><span class="c1">// and it will always will return you optional result with some value</span>
+</span><span class='line'><span class="c1">// hence no need to check for presence you can simple call get method</span>
+</span><span class='line'><span class="c1">// of course you will have to handle default value differently.</span>
+</span><span class='line'><span class="n">Person</span> <span class="n">person</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span> <span class="o">);</span>
+</span><span class='line'><span class="n">handleResult</span><span class="o">(</span> <span class="n">person</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3. Building map and reverse map.</h3>
+
+<p>Sometimes you have to build up some dictionary on your Java code, e.g. you have set of relations between two entity types and could be even between entity and Java primitives. Say you have key of type <strong>A</strong> and value of type <strong>B</strong>. You probably will finish with writing something like:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Map</span><span class="o">&lt;</span><span class="n">A</span><span class="o">,</span> <span class="n">B</span><span class="o">&gt;</span> <span class="n">dictionary</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">A</span><span class="o">,</span> <span class="n">B</span><span class="o">&gt;(</span> <span class="o">);</span>
+</span><span class='line'><span class="c1">// now the initialization loop</span>
+</span><span class='line'> <span class="k">while</span> <span class="o">(</span> <span class="n">it</span><span class="o">.</span><span class="na">hasMore</span><span class="o">(</span> <span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">B</span> <span class="n">val</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">(</span> <span class="o">);</span>
+</span><span class='line'>  <span class="n">A</span> <span class="n">key</span> <span class="o">=</span> <span class="n">computeKey</span><span class="o">(</span> <span class="n">val</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">dictionary</span><span class="o">.</span><span class="na">put</span><span class="o">(</span> <span class="n">key</span><span class="o">,</span> <span class="n">val</span><span class="o">);</span>
+</span><span class='line'> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But now, suppose that relation between <strong>A</strong> and <strong>B</strong> is one to one and you would like to have possibility to make look up for values in both directions, so the code now will look like:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Map</span><span class="o">&lt;</span><span class="n">A</span><span class="o">,</span> <span class="n">B</span><span class="o">&gt;</span> <span class="n">dictionary</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">A</span><span class="o">,</span> <span class="n">B</span><span class="o">&gt;(</span> <span class="o">);</span>
+</span><span class='line'><span class="n">Map</span><span class="o">&lt;</span><span class="n">B</span><span class="o">,</span> <span class="n">A</span><span class="o">&gt;</span> <span class="n">reverseDictionary</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">B</span><span class="o">,</span> <span class="n">A</span><span class="o">&gt;(</span> <span class="o">)</span>
+</span><span class='line'><span class="c1">// now the initialization loop</span>
+</span><span class='line'> <span class="k">while</span> <span class="o">(</span> <span class="n">it</span><span class="o">.</span><span class="na">hasMore</span><span class="o">(</span> <span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">B</span> <span class="n">val</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">(</span> <span class="o">);</span>
+</span><span class='line'>  <span class="n">A</span> <span class="n">key</span> <span class="o">=</span> <span class="n">computeKey</span><span class="o">(</span> <span class="n">val</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">dictionary</span><span class="o">.</span><span class="na">put</span><span class="o">(</span> <span class="n">key</span><span class="o">,</span> <span class="n">val</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">reverseDictionary</span><span class="o">(</span> <span class="n">val</span><span class="o">,</span> <span class="n">key</span><span class="o">);</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1">// now we able to make lookup in both directions</span>
+</span><span class='line'> <span class="c1">// say having key we can get value:</span>
+</span><span class='line'> <span class="n">B</span> <span class="n">val</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="na">get</span><span class="o">(</span> <span class="n">key</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1">// or having value we can get a key</span>
+</span><span class='line'> <span class="n">A</span> <span class="n">key</span> <span class="o">=</span> <span class="n">reverseDictionary</span><span class="o">(</span> <span class="n">val</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Guava introduce new collection type called <strong>BiMap</strong>, which is bidirectional map, designed to answer the question similar to current example, so instead of having code above we can simply write:</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">BiMap</span><span class="o">&lt;</span><span class="n">A</span><span class="o">,</span> <span class="n">B</span><span class="o">&gt;</span> <span class="n">dictionary</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashBiMap</span><span class="o">&lt;</span><span class="n">A</span><span class="o">,</span> <span class="n">B</span><span class="o">&gt;(</span> <span class="o">);</span>
+</span><span class='line'><span class="c1">// now the initialization loop</span>
+</span><span class='line'> <span class="k">while</span> <span class="o">(</span> <span class="n">it</span><span class="o">.</span><span class="na">hasMore</span><span class="o">(</span> <span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">B</span> <span class="n">val</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">(</span> <span class="o">);</span>
+</span><span class='line'>  <span class="n">A</span> <span class="n">key</span> <span class="o">=</span> <span class="n">computeKey</span><span class="o">(</span> <span class="n">val</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">dictionary</span><span class="o">.</span><span class="na">put</span><span class="o">(</span> <span class="n">key</span><span class="o">,</span> <span class="n">val</span><span class="o">);</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1">// now in order to get key for a value we have to do:</span>
+</span><span class='line'> <span class="n">A</span> <span class="n">key</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="na">inverse</span><span class="o">(</span> <span class="o">).</span><span class="na">get</span><span class="o">(</span> <span class="n">val</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There is much more things and useful functionality provided by Guava, I&rsquo;ll continue to describe uses cases and method which will allow to remove boiler plate and redundant code.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Running Matlab code on Amazon cloud.]]></title>
