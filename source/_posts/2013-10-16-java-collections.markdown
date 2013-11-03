@@ -14,8 +14,8 @@ How often you've seen something similar to following code?
 {% codeblock lang:java %}
 Set<String> names = new HashSet<String>( );
 names.add( "John D."); 
-\\ ...
-\\ and then you realize you need to pull first item from your collection
+// ...
+// and then you realize you need to pull first item from your collection
 Iterator<String> it = names.iterator( );
 String firstName = it.next( ); 
 {% endcodeblock %}
