@@ -1,4 +1,4 @@
----
+`---
 layout: post
 title: "Putting all together setup, Hadoop cluster on VM with Puppet."
 date: 2013-09-30 00:14
