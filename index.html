@@ -45,7 +45,21 @@
   <script src="/javascripts/libs/bootstrap.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
   <link href="/atom.xml" rel="alternate" title="Short notes" type="application/atom+xml">
-  
+  <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
   
 
 <script>
@@ -104,6 +118,73 @@
     <div class="row-fluid">
       <div class="span9">
   
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/2013/12/03/computing-hits-algorithm-with-map-reduce-and-mongodb/">Computing HITS Algorithm With Map-Reduce and MongoDB.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-03T01:27:00+02:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2013</time>
+        
+         | <a href="/blog/2013/12/03/computing-hits-algorithm-with-map-reduce-and-mongodb/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Recently I&rsquo;ve tackled the goal to compute HITS algorithm on large graph which represent different types of links among documents. HITS algorithm was first designed and developed by <a href="http://www.cs.cornell.edu/home/kleinber/">Jon Kleinberg</a> from Cornell University, you can read more details on <a href="http://en.wikipedia.org/wiki/HITS_algorithm">wiki</a> or in his original paper <a href="http://www.cs.cornell.edu/home/kleinber/auth.pdf">&ldquo;Authoritative Sources in a Hyperlinked Environment&rdquo;</a>.</p>
+
+<p>Briefly the main idea is, given directed graph $G=(V,E)$, we define $B_{in}(v)=&#92;{u | \, (u,v) \in E&#92;}$, all vertices which links to node $v$. Similarly we will define $B_{out}(v)=&#92;{ u | (v,u) \in E&#92;}$, all vertices which node $v$ points to. Having these definitions now we can define recursive relationships to compute authority and hub scores, iteration $n+1$ we be equals to:</p>
+
+<ul>
+<li>The &ldquo;authority&rdquo; score defined as $a_{n+1}(v)=\frac{1}{ \sqrt{ \sum_{u \in B_{in}(v)}h_n(u)^2}}\sum_{u \in B_{in}(v)}h_{n}(u)$</li>
+<li>And hub score is $h_{n+1}(v)=\frac{1}{\sqrt{ \sum_{u \in B_{out}(v)}a_n(u)^2}}\sum_{u \in B_{out}}a_{n}(u)$</li>
+</ul>
+
+
+<p>(we have to normalize weights in order for process to converge)</p>
+
+<p>Now, once we are talking of huge graph, very first thing which came in my mind is to setup Hadoop cluster, model the graph and run computation on it. The fact that HITS computation easily fits model of map-reduce makes it even more preferable approach.</p>
+
+<p>One of my goals was to learn/view the results almost immediately without any additional tooling or code writing, being able to change the model and different parts of computation process. Well, after few hours I&rsquo;ve spend reading Hadoop manuals I understood that task going to be not that easy as expected, since class which represent graph entity has to implement <a href="http://hadoop.apache.org/docs/current/api/org/apache/hadoop/io/Writable.html">Writable</a> interface to enable Hadoop framework to serialize or deserialize object into/from HDFS (HaDoop File System). It became even worse when I understood that there is no easy way to view results of execution, since I&rsquo;ve to write my own viewer of the results to view serialized results in HDFS (I&rsquo;m not saying this is too complicated or hard, just wanted to make it as easy as possible with writing less code). At this point I&rsquo;ve realised that MongoDB has its own <a href="http://docs.mongodb.org/manual/core/map-reduce/">map-reduce</a> engine, so decided to spent few more minutes to understand how it works and whenever I can leverage from it. After several minutes of reading I&rsquo;ve understood that this is exactly that I was looking for.</p>
+
+<ul>
+<li>I can setup cluster of MongoDB, to be able to process large dataset.</li>
+<li>Writing map-reduce functionality is simple as just writing two javascript functions.</li>
+<li>Can use mongo client to connect to database and execute queries in order to see the results.</li>
+<li>In case I need to adjust something in algorithm or add something there is no need to recompile code (like in case of Hadoop), just rewrite map or reduce function and execute it immediately on MongoDB client.</li>
+</ul>
+
+
+<p>Here I&rsquo;ll try to explain that exactly I did and how it works.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/12/03/computing-hits-algorithm-with-map-reduce-and-mongodb/">Continue &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -206,6 +287,65 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/2013/10/07/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Putting All Together Setup Hadoop Cluster on Vm With Puppet</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-07T00:00:00+03:00" pubdate data-updated="true">Oct 7<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/10/07/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>`&mdash;&ndash;
+layout: post
+title: &ldquo;Putting all together setup, Hadoop cluster on VM with Puppet.&rdquo;
+date: 2013-09-30 00:14
+comments: true</p>
+
+<h2>categories: hadoop cluster puppet scripts automation virtualization</h2>
+
+<p>In my two previous blog post I&rsquo;ve explained:</p>
+
+<ol>
+<li><a href="blog/2013/09/21/setup-hadoop-cluster/">Setup Hadoop cluster</a> &ndash; manual configuration on virtual machines which needed to setup Hadoop cluster.</li>
+<li><a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">Install Java on VM using vagrant and puppet</a> &ndash; I&rsquo;ve started to explain how to leverage vagrant and puppet in order to have Java installed in virtual machine.</li>
+</ol>
+
+
+<p>Now in this post I&rsquo;ll try to explain how-to setup hadoop cluster on virtual environment using vagrant and puppet scripts, so all actions in my first post could be easily automated.</p>
+
+<p> </div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/07/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Continue &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/2013/09/30/israel-global-day-of-code-retreat/">Israel Global Day of Code Retreat 2013.</a></h1>
     
     
@@ -242,57 +382,6 @@
 <p><strong>Do not miss, highly recommended.</strong></p>
 </div>
   
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Putting All Together Setup, Hadoop Cluster on VM With Puppet.</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-30T00:14:00+03:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In my two previous blog post I&rsquo;ve explained:</p>
-
-<ol>
-<li><a href="blog/2013/09/21/setup-hadoop-cluster/">Setup Hadoop cluster</a> &ndash; manual configuration on virtual machines which needed to setup Hadoop cluster.</li>
-<li><a href="blog/2013/09/21/install-java-on-vm-using-vagrant-and-puppet">Install Java on VM using vagrant and puppet</a> &ndash; I&rsquo;ve started to explain how to leverage vagrant and puppet in order to have Java installed in virtual machine.</li>
-</ol>
-
-
-<p>Now in this post I&rsquo;ll try to explain how-to setup hadoop cluster on virtual environment using vagrant and puppet scripts, so all actions in my first post could be easily automated.</p>
-
-<p> </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Continue &rarr;</a>
-    </footer>
   
 
 
@@ -444,6 +533,10 @@
     <li class="nav-header">Recent Posts</li>
     
       <li class="post">
+        <a href="/blog/2013/12/03/computing-hits-algorithm-with-map-reduce-and-mongodb/">Computing HITS algorithm with Map-Reduce and MongoDB.</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/16/java-collections/">Java Collections, Guava, reducing boilerplate code</a>
       </li>
     
@@ -452,15 +545,11 @@
       </li>
     
       <li class="post">
+        <a href="/blog/2013/10/07/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Putting All Together Setup Hadoop Cluster On Vm With Puppet</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/09/30/israel-global-day-of-code-retreat/">Israel Global Day of Code Retreat 2013.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Putting all together setup, Hadoop cluster on VM with Puppet.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/09/22/install-maven-on-vm-with-puppet/">Install Maven on VM with Puppet</a>
       </li>
     
   </ul>
@@ -490,7 +579,7 @@
 <section class="well">
 	<ul id="top-categoty-list" class="nav nav-list">
 				<li class="nav-header">Top Categories</li>
-				<ul><li><a href='/blog/categories/scripts'>scripts (3)</a></li><li><a href='/blog/categories/automation'>automation (3)</a></li><li><a href='/blog/categories/virtualization'>virtualization (3)</a></li><li><a href='/blog/categories/puppet'>puppet (3)</a></li><li><a href='/blog/categories/java'>java (2)</a></li><li><a href='/blog/categories/vm'>vm (2)</a></li><li><a href='/blog/categories/vagrant'>vagrant (2)</a></li><li><a href='/blog/categories/hadoop'>hadoop (2)</a></li><li><a href='/blog/categories/distributed'>distributed (2)</a></li><li><a href='/blog/categories/cluster'>cluster (2)</a></li></ul>
+				<ul><li><a href='/blog/categories/java'>java (2)</a></li><li><a href='/blog/categories/vagrant'>vagrant (2)</a></li><li><a href='/blog/categories/vm'>vm (2)</a></li><li><a href='/blog/categories/puppet'>puppet (2)</a></li><li><a href='/blog/categories/scripts'>scripts (2)</a></li><li><a href='/blog/categories/virtualization'>virtualization (2)</a></li><li><a href='/blog/categories/automation'>automation (2)</a></li><li><a href='/blog/categories/distributed'>distributed (2)</a></li><li><a href='/blog/categories/gdcr-2013'>GDCR_2013 (1)</a></li><li><a href='/blog/categories/amazon'>amazon (1)</a></li></ul>
 	</ul>
 </section>
 

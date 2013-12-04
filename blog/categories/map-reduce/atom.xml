@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Map-Reduce | Short notes]]></title>
+  <link href="http://pensieve.info/blog/categories/map-reduce/atom.xml" rel="self"/>
+  <link href="http://pensieve.info/"/>
+  <updated>2013-12-05T00:27:20+02:00</updated>
+  <id>http://pensieve.info/</id>
+  <author>
+    <name><![CDATA[C0rWin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Computing HITS algorithm with Map-Reduce and MongoDB.]]></title>
+    <link href="http://pensieve.info/blog/2013/12/03/computing-hits-algorithm-with-map-reduce-and-mongodb/"/>
+    <updated>2013-12-03T01:27:00+02:00</updated>
+    <id>http://pensieve.info/blog/2013/12/03/computing-hits-algorithm-with-map-reduce-and-mongodb</id>
+    <content type="html"><![CDATA[<p>Recently I&rsquo;ve tackled the goal to compute HITS algorithm on large graph which represent different types of links among documents. HITS algorithm was first designed and developed by <a href="http://www.cs.cornell.edu/home/kleinber/">Jon Kleinberg</a> from Cornell University, you can read more details on <a href="http://en.wikipedia.org/wiki/HITS_algorithm">wiki</a> or in his original paper <a href="http://www.cs.cornell.edu/home/kleinber/auth.pdf">&ldquo;Authoritative Sources in a Hyperlinked Environment&rdquo;</a>.</p>
+
+<p>Briefly the main idea is, given directed graph $G=(V,E)$, we define $B_{in}(v)=\\{u | \, (u,v) \in E\\}$, all vertices which links to node $v$. Similarly we will define $B_{out}(v)=\\{ u | (v,u) \in E\\}$, all vertices which node $v$ points to. Having these definitions now we can define recursive relationships to compute authority and hub scores, iteration $n+1$ we be equals to:</p>
+
+<ul>
+<li>The &ldquo;authority&rdquo; score defined as $a_{n+1}(v)=\frac{1}{ \sqrt{ \sum_{u \in B_{in}(v)}h_n(u)^2}}\sum_{u \in B_{in}(v)}h_{n}(u)$</li>
+<li>And hub score is $h_{n+1}(v)=\frac{1}{\sqrt{ \sum_{u \in B_{out}(v)}a_n(u)^2}}\sum_{u \in B_{out}}a_{n}(u)$</li>
+</ul>
+
+
+<p>(we have to normalize weights in order for process to converge)</p>
+
+<p>Now, once we are talking of huge graph, very first thing which came in my mind is to setup Hadoop cluster, model the graph and run computation on it. The fact that HITS computation easily fits model of map-reduce makes it even more preferable approach.</p>
+
+<p>One of my goals was to learn/view the results almost immediately without any additional tooling or code writing, being able to change the model and different parts of computation process. Well, after few hours I&rsquo;ve spend reading Hadoop manuals I understood that task going to be not that easy as expected, since class which represent graph entity has to implement <a href="http://hadoop.apache.org/docs/current/api/org/apache/hadoop/io/Writable.html">Writable</a> interface to enable Hadoop framework to serialize or deserialize object into/from HDFS (HaDoop File System). It became even worse when I understood that there is no easy way to view results of execution, since I&rsquo;ve to write my own viewer of the results to view serialized results in HDFS (I&rsquo;m not saying this is too complicated or hard, just wanted to make it as easy as possible with writing less code). At this point I&rsquo;ve realised that MongoDB has its own <a href="http://docs.mongodb.org/manual/core/map-reduce/">map-reduce</a> engine, so decided to spent few more minutes to understand how it works and whenever I can leverage from it. After several minutes of reading I&rsquo;ve understood that this is exactly that I was looking for.</p>
+
+<ul>
+<li>I can setup cluster of MongoDB, to be able to process large dataset.</li>
+<li>Writing map-reduce functionality is simple as just writing two javascript functions.</li>
+<li>Can use mongo client to connect to database and execute queries in order to see the results.</li>
+<li>In case I need to adjust something in algorithm or add something there is no need to recompile code (like in case of Hadoop), just rewrite map or reduce function and execute it immediately on MongoDB client.</li>
+</ul>
+
+
+<p>Here I&rsquo;ll try to explain that exactly I did and how it works.</p>
+
+<!-- more -->
+
+
+<h3>1. Produce initial collection.</h3>
+
+<p>First step I&rsquo;ve dumped my graph into MongoDB collection, where each entry looks like:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="p">{</span> <span class="o">&lt;</span><span class="nx">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="nx">label</span> <span class="o">:</span> <span class="o">&amp;</span><span class="nx">ldquo</span><span class="p">;</span><span class="nx">nodeName</span><span class="o">&amp;</span><span class="nx">rdquo</span><span class="p">;,</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">score</span> <span class="o">:</span> <span class="mf">1.0</span><span class="p">,</span>
+</span><span class='line'><span class="nx">links</span> <span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="nx">label</span> <span class="o">:</span> <span class="s2">&quot;childNodeName1&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">score</span> <span class="o">:</span> <span class="mf">1.0</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'><span class="p">]</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span> <span class="o">&lt;</span><span class="nx">br</span><span class="o">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>for tutorial purpose I&rsquo;ll assume collection name is &ldquo;graph&rdquo;.</p>
+
+<p>Meaning I&rsquo;ve model the graph with adjacency list, e.g. each node has it&rsquo;s own record with list of others node it connects to. Scores for everyone initialised to 1 (doesn&rsquo;t really matter it will converge anyway, but much easier for debugging, and not sure if I can say something wise about convergence speed).
+Here we can pay attention that using this collection is very intuitive to compute hub score for each node, since we have a list of all children. All we need is to iterate over list of items, sum points for each item, therefore receiving the hub score.</p>
+
+<p>Next step I splitted computation of authority and hubs between two collections, first one to handle nodes and outlinks and second one is to keep nodes and inlinks. Therefore one collection became output for map reduce action on another. So next stage is to initialise them and provide map reduce functions, to be able to run the computation.</p>
+
+<h3>2. The initialization.</h3>
+
+<p>First step I&rsquo;ll write map function to initialize hubs collections and then reduce function.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>map </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">map</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span> <span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">links</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">emit</span><span class="p">(</span> <span class="p">{</span> <span class="nx">label</span><span class="o">:</span> <span class="nx">that</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span> <span class="nx">score</span><span class="o">:</span> <span class="nx">that</span><span class="p">.</span><span class="nx">score</span><span class="p">},</span> <span class="nx">item</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The purpose why this mapper function looks like that is to make collection to look like output of map reduce on MongoDB.</p>
+
+<p>Next we need to write reducer which will has to answer all requirements of MongoDB <a href="http://docs.mongodb.org/manual/core/map-reduce/">map reduce</a> framework:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>reduce </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">reduce</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">values</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span> <span class="p">);</span>
+</span><span class='line'><span class="nx">values</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span> <span class="nx">item</span><span class="p">.</span><span class="nx">links</span><span class="p">)</span>  <span class="p">{</span> <span class="c1">// to handle consequence invocations of reducer</span>
+</span><span class='line'>        <span class="nx">item</span><span class="p">.</span><span class="nx">links</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">item</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">})</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span> <span class="nx">item</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="k">return</span> <span class="p">{</span> <span class="nx">links</span> <span class="o">:</span> <span class="nx">result</span><span class="p">};</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>And finally in order to unify output of the computation I&rsquo;ll provide finalize function:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>finalizer </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">finalizer</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">val</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="p">(</span> <span class="nx">val</span><span class="p">.</span><span class="nx">list</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">val</span><span class="p">;</span>
+</span><span class='line'><span class="k">return</span> <span class="p">{</span> <span class="nx">list</span> <span class="o">:</span> <span class="p">[</span><span class="nx">val</span><span class="p">]};</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>And here we go to produce first collection to start with calculations:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>db.graph.mapReduce( map, reduce, { out : &ldquo;graph_hubs&rdquo;, finalize : finalizer});</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This will produce startup point and collection called graph_hubs, which we going to use to compute authority scores and create second collection. Output will look like:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="s2">&quot;_id&quot;</span> <span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">label</span> <span class="o">:</span> <span class="s2">&quot;nodeName&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">score</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nx">value</span> <span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">list</span> <span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="nx">label</span> <span class="o">:</span> <span class="s2">&quot;childNodeName&quot;</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">score</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>    <span class="p">]</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>3. Universal mapper function.</h3>
+
+<p>I&rsquo;ve the initialization step, since I&rsquo;d like to have both authority and hubs collections look the same, so now I can provide some generic function which during mapping values will also compute authority or hub score (depends on which collection we execute the code).</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">universMap</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span> <span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">score</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">weight</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">links</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">score</span> <span class="o">+=</span> <span class="nx">item</span><span class="p">.</span><span class="nx">score</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">weight</span> <span class="o">+=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span> <span class="nx">item</span><span class="p">.</span><span class="nx">score</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">links</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">emit</span><span class="p">(</span> <span class="nx">item</span><span class="p">,</span> <span class="p">{</span> <span class="nx">label</span> <span class="o">:</span> <span class="nx">that</span><span class="p">.</span><span class="nx">_id</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span> <span class="nx">score</span> <span class="o">:</span> <span class="nx">score</span><span class="o">/</span><span class="nb">Math</span><span class="p">.</span><span class="nx">sqrt</span><span class="p">(</span> <span class="nx">weight</span><span class="p">)});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>4. Computation.</h3>
+
+<p>Ok, we setup and ready to go with calculation process, for sake of simplicity I&rsquo;m going to perform iterations without really checking whenever process indeed converges given some thresthold.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="k">for</span> <span class="p">(</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&amp;</span><span class="nx">lt</span><span class="p">;</span> <span class="mi">20</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">db</span><span class="p">.</span><span class="nx">graph_hubs</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span> <span class="nx">universMap</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span> <span class="nx">out</span> <span class="o">:</span> <span class="s2">&quot;graph_auths&quot;</span><span class="p">,</span> <span class="nx">finalize</span> <span class="o">:</span> <span class="nx">finalizer</span><span class="p">});</span>
+</span><span class='line'><span class="nx">db</span><span class="p">.</span><span class="nx">graph_auths</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span> <span class="nx">universMap</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span> <span class="nx">out</span> <span class="o">:</span> <span class="s2">&quot;graph_hubs&quot;</span><span class="p">,</span> <span class="nx">finalize</span> <span class="o">:</span> <span class="nx">finalizer</span><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>5. Getting results.</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">db</span><span class="p">.</span><span class="nx">graph_auth</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span> <span class="p">{},</span> <span class="p">{</span> <span class="nx">_id</span> <span class="o">:</span> <span class="mi">1</span><span class="p">}).</span><span class="nx">sort</span><span class="p">(</span> <span class="p">{</span> <span class="s2">&quot;\_id.score&quot;</span><span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}).</span><span class="nx">limit</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Command above will return us top-20 nodes with highest authority score (similar code will return the top-20 for hubs score).</p>
+
+<p>We can use same <a href="http://docs.mongodb.org/manual/core/map-reduce/">map reduce</a> framework to join results from both collections to have them in one place. Now the next step I&rsquo;m working on is to compute page rank score using same technique.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -45,7 +45,21 @@
   <script src="/javascripts/libs/bootstrap.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
   <link href="/atom.xml" rel="alternate" title="Short notes" type="application/atom+xml">
-  
+  <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
   
 
 <script>
@@ -474,6 +488,10 @@
     <li class="nav-header">Recent Posts</li>
     
       <li class="post">
+        <a href="/blog/2013/12/03/computing-hits-algorithm-with-map-reduce-and-mongodb/">Computing HITS algorithm with Map-Reduce and MongoDB.</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/16/java-collections/">Java Collections, Guava, reducing boilerplate code</a>
       </li>
     
@@ -482,15 +500,11 @@
       </li>
     
       <li class="post">
+        <a href="/blog/2013/10/07/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Putting All Together Setup Hadoop Cluster On Vm With Puppet</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/09/30/israel-global-day-of-code-retreat/">Israel Global Day of Code Retreat 2013.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/09/30/putting-all-together-setup-hadoop-cluster-on-vm-with-puppet/">Putting all together setup, Hadoop cluster on VM with Puppet.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/09/22/install-maven-on-vm-with-puppet/">Install Maven on VM with Puppet</a>
       </li>
     
   </ul>
@@ -520,7 +534,7 @@
 <section class="well">
 	<ul id="top-categoty-list" class="nav nav-list">
 				<li class="nav-header">Top Categories</li>
-				<ul><li><a href='/blog/categories/scripts'>scripts (3)</a></li><li><a href='/blog/categories/automation'>automation (3)</a></li><li><a href='/blog/categories/virtualization'>virtualization (3)</a></li><li><a href='/blog/categories/puppet'>puppet (3)</a></li><li><a href='/blog/categories/java'>java (2)</a></li><li><a href='/blog/categories/vm'>vm (2)</a></li><li><a href='/blog/categories/vagrant'>vagrant (2)</a></li><li><a href='/blog/categories/hadoop'>hadoop (2)</a></li><li><a href='/blog/categories/distributed'>distributed (2)</a></li><li><a href='/blog/categories/cluster'>cluster (2)</a></li></ul>
+				<ul><li><a href='/blog/categories/java'>java (2)</a></li><li><a href='/blog/categories/vagrant'>vagrant (2)</a></li><li><a href='/blog/categories/vm'>vm (2)</a></li><li><a href='/blog/categories/puppet'>puppet (2)</a></li><li><a href='/blog/categories/scripts'>scripts (2)</a></li><li><a href='/blog/categories/virtualization'>virtualization (2)</a></li><li><a href='/blog/categories/automation'>automation (2)</a></li><li><a href='/blog/categories/distributed'>distributed (2)</a></li><li><a href='/blog/categories/gdcr-2013'>GDCR_2013 (1)</a></li><li><a href='/blog/categories/amazon'>amazon (1)</a></li></ul>
 	</ul>
 </section>
 
